@@ -16,7 +16,7 @@
 #include <QSplitter>
 
 MainWindow::MainWindow()
-: QWidget::QWidget()
+: QWidget()
 {
     setMinimumSize(400, 300);
     
