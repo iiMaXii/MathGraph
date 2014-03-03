@@ -126,7 +126,7 @@ std::vector<std::pair<int, std::string>> Plotter::getXMarkers() const
     std::vector<std::pair<int, std::string>> markers;
     
     real step = pixelMarkerGap * (xMax - xMin) / pixelWidth;
-    step = round(step, std::floor(std::log10(step)));
+    step = round(step, static_cast<int>(std::floor(std::log10(step))));
     
     real start = std::ceil(xMin / step) * step;
     
@@ -144,7 +144,7 @@ std::vector<std::pair<int, std::string>> Plotter::getYMarkers() const
     std::vector<std::pair<int, std::string>> markers;
     
     real step = pixelMarkerGap * (yMax - yMin) / pixelHeight;
-    step = round(step, std::floor(std::log10(step)));
+    step = round(step, static_cast<int>(std::floor(std::log10(step))));
     
     real start = std::ceil(yMin / step) * step;
     
