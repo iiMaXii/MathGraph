@@ -12,6 +12,7 @@ QT += widgets
 TARGET = MathGraph
 TEMPLATE = app
 
+RESOURCES += images.qrc
 
 SOURCES +=  Expression.cpp \
             MainWindow.cpp \

@@ -31,7 +31,7 @@ MainWindow::MainWindow()
     moveToolButton->setMinimumHeight(50);
     moveToolButton->setMaximumHeight(50);
     
-    QPushButton * zoomToolButton = new QPushButton(QIcon("/Users/Max/Desktop/cursor-zoom-plus.png"), "");
+    QPushButton * zoomToolButton = new QPushButton(QIcon(":/images/cursor-zoom-plus.png"), "");
     
     zoomToolButton->setMinimumWidth(50);
     zoomToolButton->setMaximumWidth(50);
