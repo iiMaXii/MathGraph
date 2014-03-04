@@ -12,6 +12,7 @@
 
 RenderArea::RenderArea(QWidget *parent) :
     QWidget(parent),
+	graphTool(Move),
     currentPosition(0, 0),
     leftDrag(false),
     plotter()
@@ -39,7 +40,6 @@ Plotter &RenderArea::getPlotter()
     return plotter;
 }
 
-
 void RenderArea::addExpression(const Expression &expr)
 {
     plotter.addExpression(expr);
@@ -56,14 +56,17 @@ void RenderArea::centerOrigo()
     update();
 }
 
+void RenderArea::setTool(GraphTool _graphTool)
+{
+	graphTool = _graphTool;
+}
+
 void RenderArea::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    
-    //painter.drawEllipse(currentPosition, 10, 10);
-    
+	painter.setPen(QPen(QBrush(Qt::black), 4));
+
     // x-axis
-    //painter.fillPath(xAxisArrow, QBrush(Qt::black));
     Point<int> origo = plotter.getOrigo();
     
     QPainterPath xAxisArrow = QPainterPath(QPoint(0, origo.getY()));
@@ -109,14 +112,13 @@ void RenderArea::paintEvent(QPaintEvent *)
         painter.drawLine(origo.getX() - 3, currentPosition, origo.getX() + 3, currentPosition);
     }
     
-    
-    for (auto it = functionCache.cbegin(); it != functionCache.cend(); ++it)
-        painter.drawPath(*it);
-    
-    //if (leftDrag)
-    //{
-    //    painter.drawEllipse(QPoint(10, 10), 5, 5);
-    //}
+    // Draw functions
+	for (auto it = functionCache.cbegin(); it != functionCache.cend(); ++it)
+	{
+		//painter.setPen(QPen(QBrush(Qt::black), 12));
+		painter.drawPath(*it);
+	}
+        
     
     painter.setPen(palette().dark().color());
     painter.setBrush(Qt::NoBrush);
@@ -203,8 +205,6 @@ void RenderArea::rebuildFunctionCache()
 {
     functionCache.clear();
     
-    //std::cout << "Num functions: " << plotter.numExpressions() << std::endl;
-    
     Point<int> origo = plotter.getOrigo();
     
     for (Plotter::size_type i = 0; i < plotter.numExpressions(); ++i)
@@ -215,7 +215,6 @@ void RenderArea::rebuildFunctionCache()
         
         for (auto it = s.cbegin(); it != s.cend(); ++it)
         {
-            //std::cout << "Adding point: (" << it->getX() << ", " << it->getY() << ")" << std::endl;
             functionPath.lineTo(it->getX(), it->getY());
         }
         

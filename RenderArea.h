@@ -16,6 +16,13 @@
 #include <vector>
 #include "Plotter.h"
 
+enum GraphTool
+{
+	Move,
+	Selection,
+	Zoom
+};
+
 class RenderArea : public QWidget
 {
     Q_OBJECT
@@ -30,6 +37,7 @@ public:
     
     void addExpression(const Expression &expr);
     void centerOrigo();
+	void setTool(GraphTool _graphTool);
 protected:
     void paintEvent(QPaintEvent * event);
     
@@ -43,6 +51,7 @@ private:
     void move(const QPoint &newPosition);
     void rebuildFunctionCache();
     
+	GraphTool graphTool;
     QPoint currentPosition;
     bool leftDrag;
     
