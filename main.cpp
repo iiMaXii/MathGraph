@@ -1,3 +1,11 @@
+//
+//  main.cpp
+//  MathGraph
+//
+//  Copyright Max Ekström. Licenced under GPL v3 (see README).
+//
+//
+
 #include "MainWindow.h"
 #include <QApplication>
 
@@ -57,8 +65,10 @@
     return 0;
 }*/
 
-int main(int argc, char *argv[])
+int main(int argc, char * argv[])
 {
+	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
     QApplication a(argc, argv);
     MainWindow w;
     w.show();

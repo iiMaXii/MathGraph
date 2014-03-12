@@ -2,7 +2,7 @@
 //  RenderArea.h
 //  MathGraph
 //
-//  Created by Max Ekström on 2014-03-01.
+//  Copyright Max Ekström. Licenced under GPL v3 (see README).
 //
 //
 
@@ -18,9 +18,9 @@
 
 enum GraphTool
 {
-	Move,
-	Selection,
-	Zoom
+	MOVE,
+	SELECTION,
+	ZOOM
 };
 
 class RenderArea : public QWidget
@@ -33,14 +33,13 @@ public:
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
     
-    Plotter &getPlotter();
-    
     void addExpression(const Expression &expr);
     void centerOrigo();
 	void setTool(GraphTool _graphTool);
 protected:
     void paintEvent(QPaintEvent * event);
     
+	void mouseClickEvent(QMouseEvent * event);
     void mousePressEvent(QMouseEvent * event);
     void mouseReleaseEvent(QMouseEvent * event);
     void mouseMoveEvent(QMouseEvent * event);

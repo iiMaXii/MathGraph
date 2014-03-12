@@ -2,7 +2,7 @@
 //  Plotter.h
 //  MathGraph
 //
-//  Created by Max Ekström on 2014-03-01.
+//  Copyright Max Ekström. Licenced under GPL v3 (see README).
 //
 //
 
@@ -17,10 +17,6 @@
 
 class Plotter
 {
-public:
-    typedef std::vector<Expression>::size_type size_type;
-	typedef std::vector<Expression>::const_iterator const_iterator;
-private:
     int pixelWidth;
     int pixelHeight;
     
@@ -35,8 +31,17 @@ private:
     
     std::vector<Expression> expressions;
     
+	int xPtToPx(real x) const;
+	int yPtToPx(real y) const;
+
+	real xPxToPt(int x) const;
+	real yPxToPt(int y) const;
+
 public:
-    Plotter(int _pixelWidth, int _pixelHeight, real _xMin, real _xMax, real _yMin, real _yMax, double _samplingRate = 2, int _pixelMarkerGap = 100);
+	typedef std::vector<Expression>::size_type size_type;
+	typedef std::vector<Expression>::const_iterator const_iterator;
+
+	Plotter(int _pixelWidth, int _pixelHeight, real _xMin, real _xMax, real _yMin, real _yMax, double _samplingRate = 2, int _pixelMarkerGap = 100);
     Plotter(int _pixelWidth, int _pixelHeight);
 	Plotter();
     
@@ -57,8 +62,9 @@ public:
     
     size_type numExpressions() const;
     std::vector<Point<int>> getPlotSamples(size_type expressionIndex) const;
-    Point<real> getPoint(size_type expressionIndex, real x) const;
-    
+    //Point<real> getPoint(size_type expressionIndex, real x) const;
+	std::pair<Point<int>, Point<std::string>> getNearestPoint(int x, int y) const;
+
 	const_iterator cbegin() const;
 	const_iterator cend() const;
 };

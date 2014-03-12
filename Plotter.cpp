@@ -2,14 +2,34 @@
 //  Plotter.cpp
 //  MathGraph
 //
-//  Created by Max Ekström on 2014-03-01.
+//  Copyright Max Ekström. Licenced under GPL v3 (see README).
 //
 //
-
 
 #include <iostream>
 #include "Plotter.h"
 #include <cmath>
+#include <limits>
+
+int Plotter::xPtToPx(real x) const
+{
+	return static_cast<int>(pixelWidth * (x - xMin) / (xMax - xMin));
+}
+
+int Plotter::yPtToPx(real y) const
+{
+	return static_cast<int>(pixelHeight * (1 - (y - yMin) / (yMax - yMin)));
+}
+
+real Plotter::xPxToPt(int x) const
+{
+	return (xMax - xMin) * x / pixelWidth + xMin;
+}
+
+real Plotter::yPxToPt(int y) const
+{
+	return 1 - (yMax - yMin) * y / pixelHeight + yMin;
+}
 
 Plotter::Plotter(int _pixelWidth, int _pixelHeight, real _xMin, real _xMax, real _yMin, real _yMax, double _samplingRate, int _pixelMarkerGap)
 : pixelWidth(_pixelWidth), pixelHeight(_pixelHeight), xMin(_xMin), xMax(_xMax), yMin(_yMin), yMax(_yMax), samplingRate(_samplingRate), pixelMarkerGap(_pixelMarkerGap)
@@ -181,6 +201,31 @@ std::vector<Point<int>> Plotter::getPlotSamples(Plotter::size_type expressionInd
     }
     
     return result;
+}
+
+std::pair<Point<int>, Point<std::string>> Plotter::getNearestPoint(int x, int y) const
+{ // do nearest point instead pythagoras
+	Expression::setVariable("x", yPxToPt(x));
+	
+	int nearestValue = std::numeric_limits<int>::min();
+	size_t nearestIndex = 0;
+	for (size_type i = 0; i != expressions.size(); ++i)
+	{
+		int currentValue = yPtToPx(expressions[i].evaluate());
+
+		if (std::abs(y - currentValue) < std::abs(y - nearestValue))
+		{
+			nearestValue = currentValue;
+			nearestIndex = i;
+		}
+	}
+
+	return std::pair<Point<int>, Point<std::string>>(
+		Point<int>(x, nearestValue),
+		Point<std::string>(
+			toString(yPxToPt(x)), // has already been calculated
+			toString(0))
+		);
 }
 
 Plotter::const_iterator Plotter::cbegin() const

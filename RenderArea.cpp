@@ -2,22 +2,23 @@
 //  RenderArea.cpp
 //  MathGraph
 //
-//  Created by Max Ekström on 2014-03-01.
+//  Copyright Max Ekström. Licenced under GPL v3 (see README).
 //
 //
 
 #include "renderarea.h"
 #include <iostream>
 #include <cmath>
+#include "real.h"
 
 RenderArea::RenderArea(QWidget *parent) :
     QWidget(parent),
-	graphTool(Move),
+	graphTool(MOVE),
     currentPosition(0, 0),
     leftDrag(false),
     plotter()
 {
-    Expression::addFunction("sin", std::sin);
+	Expression::addFunction("sin", std::sin);
     Expression::addFunction("cos", std::cos);
     
     setCursor(Qt::OpenHandCursor);
@@ -33,11 +34,6 @@ QSize RenderArea::minimumSizeHint() const
 QSize RenderArea::sizeHint() const
 {
     return QSize(400, 300);
-}
-
-Plotter &RenderArea::getPlotter()
-{
-    return plotter;
 }
 
 void RenderArea::addExpression(const Expression &expr)
@@ -125,14 +121,32 @@ void RenderArea::paintEvent(QPaintEvent *)
     painter.drawRect(QRect(0, 0, width() - 1, height() - 1));
 }
 
+void RenderArea::mouseClickEvent(QMouseEvent * event)
+{
+	std::cout << "Click event" << std::endl;
+}
+
 void RenderArea::mousePressEvent(QMouseEvent * event)
 {
     if (event->button() == Qt::LeftButton)
     {
         currentPosition = event->pos();
+		leftDrag = true;
+
+		switch(graphTool)
+		{
+		case MOVE:
+			setCursor(Qt::ClosedHandCursor);
+			break;
+		case SELECTION:
+			// 
+			break;
+		case ZOOM:
+			//
+			break;
+		}
         
-        setCursor(Qt::ClosedHandCursor);
-        leftDrag = true;
+        
     }
 }
 
@@ -141,10 +155,22 @@ void RenderArea::mouseReleaseEvent(QMouseEvent * event)
     if (event->button() == Qt::LeftButton && leftDrag)
     {
         QPoint newPosition = event->pos();
-        move(newPosition);
-        
-        setCursor(Qt::OpenHandCursor);
-        leftDrag = false;
+		leftDrag = false;
+
+		switch (graphTool)
+		{
+		case MOVE:
+			move(newPosition);
+			setCursor(Qt::OpenHandCursor);
+			break;
+		case SELECTION:
+			//plotter.getPoint()
+			break;
+		case ZOOM:
+			//
+			break;
+		}
+
         update();
     }
 }

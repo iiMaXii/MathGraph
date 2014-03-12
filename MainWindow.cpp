@@ -2,7 +2,7 @@
 //  MainWindow.cpp
 //  MathGraph
 //
-//  Created by Max Ekström on 2014-03-01.
+//  Copyright Max Ekström. Licenced under GPL v3 (see README).
 //
 //
 
@@ -22,80 +22,97 @@ MainWindow::MainWindow()
     
     QVBoxLayout * mainLayout = new QVBoxLayout;
     
-    // Fancy buttons
-    QPushButton * moveToolButton = new QPushButton(QIcon("/Users/Max/Desktop/cursor-openhand.png"), "");
-    //moveToolButton->setIconSize(QSize(40, 40));
+    // Toolbar
+	QHBoxLayout * toolbar = new QHBoxLayout;
+
+	// Toolbar: Move tool button
+    QPushButton * moveToolButton = new QPushButton(QIcon(), "");
+	moveToolButton->setToolTip("Move tool");
+	//moveToolButton->setIconSize(QSize(40, 40));
+	moveToolButton->setIcon(QIcon("/Users/Max/Desktop/cursor-openhand.png"));
     
     moveToolButton->setMinimumWidth(50);
     moveToolButton->setMaximumWidth(50);
     moveToolButton->setMinimumHeight(50);
     moveToolButton->setMaximumHeight(50);
     
-    QPushButton * zoomToolButton = new QPushButton(QIcon(":/images/cursor-zoom-plus.png"), "");
-    
+	toolbar->addWidget(moveToolButton);
+
+	// Toolbar: Zoom tool button
+    QPushButton * zoomToolButton = new QPushButton();
+	zoomToolButton->setToolTip("Zoom tool");
+	//zoomToolButton->setIconSize(QSize(32, 32));
+	zoomToolButton->setIcon(QIcon(":/cursor-zoom-plus.png"));
+
     zoomToolButton->setMinimumWidth(50);
     zoomToolButton->setMaximumWidth(50);
     zoomToolButton->setMinimumHeight(50);
     zoomToolButton->setMaximumHeight(50);
     
-    QPushButton * selectionToolButton = new QPushButton(QIcon("/Users/Max/Desktop/cursor-cross.png"), "");
+	toolbar->addWidget(zoomToolButton);
+
+	// Toolbar: Selection tool button
+    QPushButton * selectionToolButton = new QPushButton();
+	selectionToolButton->setToolTip("Selection tool");
+	selectionToolButton->setIcon(QIcon("/Users/Max/Desktop/cursor-cross.png"));
 
     selectionToolButton->setMinimumWidth(50);
     selectionToolButton->setMaximumWidth(50);
     selectionToolButton->setMinimumHeight(50);
     selectionToolButton->setMaximumHeight(50);
     
+	toolbar->addWidget(selectionToolButton);
+
+	toolbar->addSpacing(20);
+
+	// Toolbar: Center origo button
     QPushButton * centerOrigioButton = new QPushButton(tr("Center origo"));
     
-    QHBoxLayout * toolbar = new QHBoxLayout;
-    
-    //toolbar->SetMinimumSize(32, 32);
-    
-    toolbar->addWidget(moveToolButton);
-    toolbar->addWidget(zoomToolButton);
-    toolbar->addWidget(selectionToolButton);
-    toolbar->addSpacing(20);
     toolbar->addWidget(centerOrigioButton);
     toolbar->addStretch();
     
     mainLayout->addLayout(toolbar);
     
-    //Output area
-    QSplitter * splitter = new QSplitter();
+    // Output area
+    QSplitter * outputArea = new QSplitter();
     
-    // Expression list
+    // Output area: Expression list
     expressionList = new QListWidget;
-    splitter->addWidget(expressionList);
+	outputArea->addWidget(expressionList);
     
-    // Render area
+    // Output area: Render area
     renderArea = new RenderArea;
-    splitter->addWidget(renderArea);
+	outputArea->addWidget(renderArea);
     
-    splitter->setStretchFactor(0, 1);
-    splitter->setStretchFactor(1, 3);
+	outputArea->setStretchFactor(0, 1);
+	outputArea->setStretchFactor(1, 3);
     
-    mainLayout->addWidget(splitter);
+	mainLayout->addWidget(outputArea);
     
     // Input area
     expressionLineEdit = new QLineEdit;
-    expressionLineEdit->setFocus();
-    QPushButton * addExpressionButton = new QPushButton(tr("Add"));
+    QPushButton * addExpressionButton = new QPushButton("Add");
     
-    // Main layout
     QHBoxLayout * expressionInput = new QHBoxLayout;
     expressionInput->addWidget(expressionLineEdit);
     expressionInput->addWidget(addExpressionButton);
     
     mainLayout->addLayout(expressionInput);
     
+	// Main layout
     setLayout(mainLayout);
     
+	// Set focus
+	expressionLineEdit->setFocus();
+
     // Events
     connect(addExpressionButton, SIGNAL(clicked()), this, SLOT(addExpression()));
     connect(expressionLineEdit, SIGNAL(returnPressed()), addExpressionButton, SIGNAL(clicked()));
     
-    
     connect(centerOrigioButton, SIGNAL(clicked()), this, SLOT(centerOrigo()));
+	connect(moveToolButton, SIGNAL(clicked()), this, SLOT(setTool(GraphTool::MOVE)));
+	connect(zoomToolButton, SIGNAL(clicked()), this, SLOT(setTool(GraphTool::ZOOM)));
+	connect(selectionToolButton, SIGNAL(clicked()), this, SLOT(setSelectTool()));
 }
 
 QSize MainWindow::sizeHint() const
@@ -129,3 +146,23 @@ void MainWindow::centerOrigo()
 {
     renderArea->centerOrigo();
 }
+
+void MainWindow::setMoveTool()
+{
+	renderArea->setTool(MOVE);
+}
+
+void MainWindow::setSelectionTool()
+{
+	renderArea->setTool(SELECTION);
+}
+
+void MainWindow::setZoomTool()
+{
+	renderArea->setTool(ZOOM);
+}
+
+//void MainWindow::setTool(GraphTool _graphTool)
+//{
+//	renderArea->setTool(_graphTool);
+//}

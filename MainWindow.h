@@ -2,7 +2,7 @@
 //  MainWindow.h
 //  MathGraph
 //
-//  Created by Max Ekström on 2014-03-01.
+//  Copyright Max Ekström. Licenced under GPL v3 (see README).
 //
 //
 
@@ -25,6 +25,9 @@ public:
 public slots:
     void addExpression();
     void centerOrigo();
+	void setMoveTool();
+	void setSelectionTool();
+	void setZoomTool();
 private:
     QListWidget * expressionList;
     RenderArea * renderArea;
