@@ -29,8 +29,8 @@ real round(real value, int decimals)
 std::string toString(real value)
 {
     std::string result = std::to_string(value);
-    result.erase (result.find_last_not_of('0') + 1, std::string::npos);
     
+    result.erase(result.find_last_not_of('0') + 1, std::string::npos);
     if (result.back() == '.') result.pop_back();
     
     return result;
