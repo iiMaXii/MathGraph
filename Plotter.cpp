@@ -146,14 +146,14 @@ std::vector<std::pair<int, std::string>> Plotter::getXMarkers() const
     std::vector<std::pair<int, std::string>> markers;
     
     real step = pixelMarkerGap * (xMax - xMin) / pixelWidth;
-    step = round(step, static_cast<int>(std::floor(std::log10(step))));
+    step = real_functions::round(step, static_cast<int>(real_functions::floor(real_functions::log10(step))));
     
     real start = std::ceil(xMin / step) * step;
     
     real pixelRatio = pixelWidth / (xMax - xMin);
     for (real x = start; x <= xMax; x += step)
     {
-        if (x != 0) markers.emplace_back(static_cast<int>((x - xMin) * pixelRatio), toString(x));
+        if (x != 0) markers.emplace_back(static_cast<int>((x - xMin) * pixelRatio), real_functions::toString(x));
     }
     
     return markers;
@@ -164,14 +164,14 @@ std::vector<std::pair<int, std::string>> Plotter::getYMarkers() const
     std::vector<std::pair<int, std::string>> markers;
     
     real step = pixelMarkerGap * (yMax - yMin) / pixelHeight;
-    step = round(step, static_cast<int>(std::floor(std::log10(step))));
+    step = real_functions::round(step, static_cast<int>(real_functions::floor(real_functions::log10(step))));
     
     real start = std::ceil(yMin / step) * step;
     
     real yDiff = yMax - yMin;
     for (real y = start; y <= yMax; y += step)
     {
-        if (y != 0) markers.emplace_back(static_cast<int>(pixelHeight * (1 - (y - yMin) / yDiff)), toString(y));
+        if (y != 0) markers.emplace_back(static_cast<int>(pixelHeight * (1 - (y - yMin) / yDiff)), real_functions::toString(y));
     }
     
     return markers;
@@ -223,8 +223,8 @@ std::pair<Point<int>, Point<std::string>> Plotter::getNearestPoint(int x, int y)
 	return std::pair<Point<int>, Point<std::string>>(
 		Point<int>(x, nearestValue),
 		Point<std::string>(
-			toString(yPxToPt(x)), // has already been calculated
-			toString(0))
+			real_functions::toString(yPxToPt(x)), // has already been calculated
+			real_functions::toString(0))
 		);
 }
 

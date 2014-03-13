@@ -26,20 +26,28 @@
 
 typedef long double real;
 
-//namespace real_f
-//{
-	//real(*sin_ff)(real);
-	//real(*sinn_ff)(real) = static_cast<real(*)(real)>(std::sin);
-
-	//real (*pow)(real, real) = std::pow;
-
-	//real (*sin)(real) = std::sin;
-	//real (*cos)(real) = std::cos;
-	//real (*tan)(real) = std::tan;
-//}
-
-bool parseReal(const std::string &str, long double &real);
-real round(real value, int decimals);
-std::string toString(real value);
+namespace real_functions
+{
+    constexpr auto cos = static_cast<real (*)(real)>( std::cos );
+    constexpr auto sin = static_cast<real (*)(real)>( std::sin );
+    constexpr auto tan = static_cast<real (*)(real)>( std::tan );
+    
+    constexpr auto arccos = static_cast<real (*)(real)>( std::acos );
+    constexpr auto arcsin = static_cast<real (*)(real)>( std::asin );
+    constexpr auto arctan = static_cast<real (*)(real)>( std::atan );
+    
+    constexpr auto pow  = static_cast<real (*)(real, real)>( std::pow  );
+    constexpr auto sqrt = static_cast<real (*)(real)>      ( std::sqrt );
+    
+    constexpr auto ceil  = static_cast<real (*)(real)>( std::ceil  );
+    constexpr auto floor = static_cast<real (*)(real)>( std::floor );
+    
+    constexpr auto log   = static_cast<real (*)(real)>( std::log   );
+    constexpr auto log10 = static_cast<real (*)(real)>( std::log10 );
+    
+    bool parseReal(const std::string &str, long double &real);
+    real round(real value, int decimals);
+    std::string toString(real value);
+}
 
 #endif /* defined(__MathGraph__real__) */

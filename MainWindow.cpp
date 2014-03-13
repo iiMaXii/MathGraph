@@ -42,7 +42,7 @@ MainWindow::MainWindow()
     QPushButton * zoomToolButton = new QPushButton();
 	zoomToolButton->setToolTip("Zoom tool");
 	//zoomToolButton->setIconSize(QSize(32, 32));
-	zoomToolButton->setIcon(QIcon(":/cursor-zoom-plus.png"));
+	zoomToolButton->setIcon(QIcon(":/images/cursor-zoom-plus.png"));
 
     zoomToolButton->setMinimumWidth(50);
     zoomToolButton->setMaximumWidth(50);
@@ -110,9 +110,9 @@ MainWindow::MainWindow()
     connect(expressionLineEdit, SIGNAL(returnPressed()), addExpressionButton, SIGNAL(clicked()));
     
     connect(centerOrigioButton, SIGNAL(clicked()), this, SLOT(centerOrigo()));
-	connect(moveToolButton, SIGNAL(clicked()), this, SLOT(setTool(GraphTool::MOVE)));
-	connect(zoomToolButton, SIGNAL(clicked()), this, SLOT(setTool(GraphTool::ZOOM)));
-	connect(selectionToolButton, SIGNAL(clicked()), this, SLOT(setSelectTool()));
+	connect(moveToolButton, SIGNAL(clicked()), this, SLOT(setMoveTool()));
+	connect(zoomToolButton, SIGNAL(clicked()), this, SLOT(setZoomTool()));
+	connect(selectionToolButton, SIGNAL(clicked()), this, SLOT(setSelectionTool()));
 }
 
 QSize MainWindow::sizeHint() const
@@ -161,8 +161,3 @@ void MainWindow::setZoomTool()
 {
 	renderArea->setTool(ZOOM);
 }
-
-//void MainWindow::setTool(GraphTool _graphTool)
-//{
-//	renderArea->setTool(_graphTool);
-//}

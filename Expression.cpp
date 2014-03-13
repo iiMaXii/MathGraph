@@ -326,7 +326,7 @@ real Expression::evaluate() const
                             numberStack.push(firstOperand / secondOperand);
                             break;
                         case '^':
-                            numberStack.push(pow(firstOperand, secondOperand));
+                            numberStack.push(real_functions::pow(firstOperand, secondOperand));
                             break;
                         default:
                             cout << "ERROR! Unkown operator: " << token << endl;
@@ -334,7 +334,7 @@ real Expression::evaluate() const
                     }
                 }
             }
-        } else if (parseReal(token, number))
+        } else if (real_functions::parseReal(token, number))
         {
             numberStack.push(number);
         }

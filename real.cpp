@@ -9,7 +9,7 @@
 #include "real.h"
 #include <cmath>
 
-bool parseReal(const std::string &str, long double &real)
+bool real_functions::parseReal(const std::string &str, long double &real)
 {
     try {
         real = stold(str);
@@ -19,14 +19,14 @@ bool parseReal(const std::string &str, long double &real)
     }
 }
 
-real round(real value, int decimals)
+real real_functions::round(real value, int decimals)
 {
     real multiplier = std::pow(10, decimals);
     
     return static_cast<int>(value / multiplier) * multiplier;
 }
 
-std::string toString(real value)
+std::string real_functions::toString(real value)
 {
     std::string result = std::to_string(value);
     
@@ -35,3 +35,5 @@ std::string toString(real value)
     
     return result;
 }
+
+//sin_ff = static_cast<real(*)(real)>(std::sin);

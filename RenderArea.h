@@ -39,7 +39,6 @@ public:
 protected:
     void paintEvent(QPaintEvent * event);
     
-	void mouseClickEvent(QMouseEvent * event);
     void mousePressEvent(QMouseEvent * event);
     void mouseReleaseEvent(QMouseEvent * event);
     void mouseMoveEvent(QMouseEvent * event);
@@ -51,7 +50,8 @@ private:
     void rebuildFunctionCache();
     
 	GraphTool graphTool;
-    QPoint currentPosition;
+    QPoint initialPosition; // Move and zoom start point
+    QPoint currentPosition; // Zoom end point
     bool leftDrag;
     
     Plotter plotter;
