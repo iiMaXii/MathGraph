@@ -76,7 +76,7 @@ void RenderArea::setTool(GraphTool _graphTool)
 void RenderArea::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-	painter.setPen(QPen(QBrush(Qt::black), 4));
+	//painter.setPen(QPen(QBrush(Qt::black), 4));
 
     // x-axis
     Point<int> origo = plotter.getOrigo();
@@ -127,7 +127,7 @@ void RenderArea::paintEvent(QPaintEvent *)
     // Draw functions
 	for (auto it = functionCache.cbegin(); it != functionCache.cend(); ++it)
 	{
-		//painter.setPen(QPen(QBrush(Qt::black), 12));
+		//painter.setPen(QPen(QBrush(Qt::black), 4));
 		painter.drawPath(*it);
 	}
     
@@ -137,7 +137,7 @@ void RenderArea::paintEvent(QPaintEvent *)
         switch (graphTool)
         {
             case ZOOM:
-                painter.setPen(palette().dark().color());
+                painter.setPen(Qt::DashLine);
                 painter.setBrush(Qt::NoBrush);
                 painter.drawRect(QRect(initialPosition, currentPosition));
                 break;
@@ -190,9 +190,10 @@ void RenderArea::mouseReleaseEvent(QMouseEvent * event)
                 //plotter.getPoint()
                 break;
             case ZOOM:
-                //plotter.
+                std::cout << "(" << initialPosition.x() << ", " << initialPosition.y() << ")" << std::endl;
+                std::cout << "(" << currentPosition.x() << ", " << currentPosition.y() << ")" << std::endl;
+                plotter.setBounds(initialPosition.x(), currentPosition.x(), initialPosition.y(), currentPosition.y());
                 rebuildFunctionCache();
-                // do zoom
                 break;
 		}
 

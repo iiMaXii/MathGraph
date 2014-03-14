@@ -50,6 +50,7 @@ public:
     
     void centerOrigo();
     void setBounds(real _xMin, real _xMax, real _yMin, real _yMax);
+    void setBounds(int xPixelMin, int xPixelMax, int yPixelMin, int yPixelMax);
     void setSamplingRate(real _samplingRate);
     
     void resize(int _pixelWidth, int _pixelHeight);

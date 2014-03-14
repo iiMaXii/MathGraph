@@ -23,12 +23,15 @@ int Plotter::yPtToPx(real y) const
 
 real Plotter::xPxToPt(int x) const
 {
-	return (xMax - xMin) * x / pixelWidth + xMin;
+	return (xMax - xMin) * static_cast<real>(x) / pixelWidth + xMin;
 }
 
 real Plotter::yPxToPt(int y) const
 {
-	return 1 - (yMax - yMin) * y / pixelHeight + yMin;
+    // (yMax - yMin)*(1 - i / pixelHeight) + yMin = y
+	//return 1 - (yMax - yMin) * y / pixelHeight + yMin;
+    //return (yMax - yMin) * (1 - static_cast<real>(y) / pixelHeight) + yMin;
+    return y * (yMax - yMin) / pixelHeight + yMin;
 }
 
 Plotter::Plotter(int _pixelWidth, int _pixelHeight, real _xMin, real _xMax, real _yMin, real _yMax, double _samplingRate, int _pixelMarkerGap)
@@ -70,6 +73,18 @@ void Plotter::setBounds(real _xMin, real _xMax, real _yMin, real _yMax)
     
     yMin = _yMin;
     yMax = _yMax;
+}
+
+void Plotter::setBounds(int xPixelMin, int xPixelMax, int yPixelMin, int yPixelMax)
+{
+    xMin = xPxToPt(xPixelMin);
+    xMax = xPxToPt(xPixelMax);
+    
+    yMin = yPxToPt(yPixelMin);
+    yMax = yPxToPt(yPixelMax);
+    
+    std::cout << "x pt: (" << xMin << ", " << xMax << ")" << std::endl;
+    std::cout << "y pt: (" << yMin << ", " << yMax << ")" << std::endl;
 }
 
 void Plotter::setSamplingRate(real _samplingRate)
@@ -204,7 +219,7 @@ std::vector<Point<int>> Plotter::getPlotSamples(Plotter::size_type expressionInd
 }
 
 std::pair<Point<int>, Point<std::string>> Plotter::getNearestPoint(int x, int y) const
-{ // do nearest point instead pythagoras
+{ // do nearest point instead, pythagoras
 	Expression::setVariable("x", yPxToPt(x));
 	
 	int nearestValue = std::numeric_limits<int>::min();
