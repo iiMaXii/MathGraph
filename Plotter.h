@@ -33,7 +33,7 @@ class Plotter
     
 	int xPtToPx(real x) const;
 	int yPtToPx(real y) const;
-
+	
 	real xPxToPt(int x) const;
 	real yPxToPt(int y) const;
 
@@ -64,7 +64,7 @@ public:
     size_type numExpressions() const;
     std::vector<Point<int>> getPlotSamples(size_type expressionIndex) const;
     //Point<real> getPoint(size_type expressionIndex, real x) const;
-	std::pair<Point<int>, Point<std::string>> getNearestPoint(int x, int y) const;
+	std::pair<Point<int>, Point<std::string>> getPoint(size_type expressionIndex, int x, int y) const;
 
 	const_iterator cbegin() const;
 	const_iterator cend() const;

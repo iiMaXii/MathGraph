@@ -23,15 +23,12 @@ int Plotter::yPtToPx(real y) const
 
 real Plotter::xPxToPt(int x) const
 {
-	return (xMax - xMin) * static_cast<real>(x) / pixelWidth + xMin;
+	return x * (xMax - xMin) / pixelWidth + xMin;
 }
 
 real Plotter::yPxToPt(int y) const
 {
-    // (yMax - yMin)*(1 - i / pixelHeight) + yMin = y
-	//return 1 - (yMax - yMin) * y / pixelHeight + yMin;
-    //return (yMax - yMin) * (1 - static_cast<real>(y) / pixelHeight) + yMin;
-    return y * (yMax - yMin) / pixelHeight + yMin;
+    return (pixelHeight - y) * (yMax - yMin) / pixelHeight + yMin;
 }
 
 Plotter::Plotter(int _pixelWidth, int _pixelHeight, real _xMin, real _xMax, real _yMin, real _yMax, double _samplingRate, int _pixelMarkerGap)
@@ -80,8 +77,8 @@ void Plotter::setBounds(int xPixelMin, int xPixelMax, int yPixelMin, int yPixelM
     xMin = xPxToPt(xPixelMin);
     xMax = xPxToPt(xPixelMax);
     
-    yMin = yPxToPt(yPixelMin);
-    yMax = yPxToPt(yPixelMax);
+	yMin = yPxToPt(yPixelMax);
+	yMax = yPxToPt(yPixelMin);
     
     std::cout << "x pt: (" << xMin << ", " << xMax << ")" << std::endl;
     std::cout << "y pt: (" << yMin << ", " << yMax << ")" << std::endl;
@@ -218,29 +215,23 @@ std::vector<Point<int>> Plotter::getPlotSamples(Plotter::size_type expressionInd
     return result;
 }
 
-std::pair<Point<int>, Point<std::string>> Plotter::getNearestPoint(int x, int y) const
-{ // do nearest point instead, pythagoras
-	Expression::setVariable("x", yPxToPt(x));
-	
-	int nearestValue = std::numeric_limits<int>::min();
-	size_t nearestIndex = 0;
-	for (size_type i = 0; i != expressions.size(); ++i)
-	{
-		int currentValue = yPtToPx(expressions[i].evaluate());
+std::pair<Point<int>, Point<std::string>> Plotter::getPoint(size_type expressionIndex, int x, int y) const
+{
+	real real_x = yPxToPt(x);
+	real real_y;
+	Expression::setVariable("x", real_x);
 
-		if (std::abs(y - currentValue) < std::abs(y - nearestValue))
-		{
-			nearestValue = currentValue;
-			nearestIndex = i;
-		}
-	}
+	real_y = expressions[expressionIndex].evaluate();
+
+	y = yPtToPx(real_y);
 
 	return std::pair<Point<int>, Point<std::string>>(
-		Point<int>(x, nearestValue),
+		Point<int>(x, y),
 		Point<std::string>(
-			real_functions::toString(yPxToPt(x)), // has already been calculated
-			real_functions::toString(0))
-		);
+			real_functions::toString(real_x),
+			real_functions::toString(real_y)
+		)
+	);
 }
 
 Plotter::const_iterator Plotter::cbegin() const

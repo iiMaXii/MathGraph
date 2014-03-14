@@ -55,7 +55,7 @@ private:
     bool leftDrag;
     
     Plotter plotter;
-    std::vector<QPainterPath> functionCache;
+    std::vector<std::pair<bool, QPainterPath>> functionCache;
 };
 
 #endif /* defined(__MathGraph__RenderArea__) */

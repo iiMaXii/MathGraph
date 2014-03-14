@@ -14,15 +14,14 @@
 RenderArea::RenderArea(QWidget *parent) :
     QWidget(parent),
 	graphTool(MOVE),
-    initialPosition(0, 0),
-    currentPosition(0, 0),
+    initialPosition(-1, -1),
+    currentPosition(-1, -1),
     leftDrag(false),
     plotter()
 {
 	Expression::addFunction("sin", real_functions::sin);
     Expression::addFunction("cos", real_functions::cos);
     Expression::addFunction("tan", real_functions::tan);
-    
     
     setCursor(Qt::OpenHandCursor);
     setBackgroundRole(QPalette::Base);
@@ -128,7 +127,7 @@ void RenderArea::paintEvent(QPaintEvent *)
 	for (auto it = functionCache.cbegin(); it != functionCache.cend(); ++it)
 	{
 		//painter.setPen(QPen(QBrush(Qt::black), 4));
-		painter.drawPath(*it);
+		painter.drawPath(it->second);
 	}
     
     // Draw tools
@@ -162,7 +161,7 @@ void RenderArea::mousePressEvent(QMouseEvent * event)
                 setCursor(Qt::ClosedHandCursor);
                 break;
             case SELECTION:
-                //
+				currentPosition = event->pos();
                 break;
             case ZOOM:
                 initialPosition = event->pos();
@@ -187,7 +186,8 @@ void RenderArea::mouseReleaseEvent(QMouseEvent * event)
                 setCursor(Qt::OpenHandCursor);
                 break;
             case SELECTION:
-                //plotter.getPoint()
+				currentPosition.setX(-1);
+				currentPosition.setX(-1);
                 break;
             case ZOOM:
                 std::cout << "(" << initialPosition.x() << ", " << initialPosition.y() << ")" << std::endl;
