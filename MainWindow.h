@@ -24,10 +24,13 @@ public:
     QSize sizeHint() const;
 public slots:
     void addExpression();
+    
     void centerOrigo();
 	void setMoveTool();
 	void setSelectionTool();
 	void setZoomTool();
+    
+    void expressionSelectionChanged();
 private:
     QListWidget * expressionList;
     RenderArea * renderArea;

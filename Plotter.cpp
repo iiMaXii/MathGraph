@@ -45,14 +45,16 @@ Plotter::Plotter()
 : Plotter(0, 0)
 {}
 
-void Plotter::addExpression(std::string expression)
+void Plotter::addExpression(const std::string &expression)
 {
     expressions.emplace_back(expression);
+    expressionIsHidden.push_back(false);
 }
 
 void Plotter::addExpression(const Expression &expression)
 {
-	expressions.push_back(expression);
+	expressions.emplace_back(expression);
+    expressionIsHidden.push_back(false);
 }
 
 void Plotter::centerOrigo()
@@ -74,14 +76,7 @@ void Plotter::setBounds(real _xMin, real _xMax, real _yMin, real _yMax)
 
 void Plotter::setBounds(int xPixelMin, int xPixelMax, int yPixelMin, int yPixelMax)
 {
-    xMin = xPxToPt(xPixelMin);
-    xMax = xPxToPt(xPixelMax);
-    
-	yMin = yPxToPt(yPixelMax);
-	yMax = yPxToPt(yPixelMin);
-    
-    std::cout << "x pt: (" << xMin << ", " << xMax << ")" << std::endl;
-    std::cout << "y pt: (" << yMin << ", " << yMax << ")" << std::endl;
+    setBounds(xPxToPt(xPixelMin), xPxToPt(xPixelMax), yPxToPt(yPixelMax), yPxToPt(yPixelMin));
 }
 
 void Plotter::setSamplingRate(real _samplingRate)
@@ -123,8 +118,8 @@ void Plotter::zoom(int steps, int x, int y)
         real yMaxPercentage = static_cast<real>(y) / pixelHeight;
         real yMinPercentage = 1 - yMaxPercentage;
         
-        //std::cout << "xModifier: " << xMinPercentage << ", " << xMaxPercentage << std::endl;
-        //std::cout << "yModifier: " << yMinPercentage << ", " << yMaxPercentage << std::endl;
+        std::cout << "xModifier: " << xMinPercentage << ", " << xMaxPercentage << std::endl;
+        std::cout << "yModifier: " << yMinPercentage << ", " << yMaxPercentage << std::endl;
         
         if (steps < 0)
         {
@@ -194,6 +189,31 @@ Plotter::size_type Plotter::numExpressions() const
     return expressions.size();
 }
 
+void Plotter::setHidden(size_type expressionIndex, bool hidden)
+{
+    expressionIsHidden[expressionIndex] = hidden;
+}
+
+bool Plotter::isHidden(size_type expressionIndex) const
+{
+    return expressionIsHidden[expressionIndex];
+}
+
+void Plotter::select(size_type expressionIndex)
+{
+    selectedExpression = expressionIndex;
+}
+
+void Plotter::clearSelection()
+{
+    selectedExpression = npos;
+}
+
+bool Plotter::isSelected(size_type expressionIndex) const
+{
+    return expressionIndex == selectedExpression;
+}
+
 std::vector<Point<int>> Plotter::getPlotSamples(Plotter::size_type expressionIndex) const
 {
     std::vector<Point<int>> result;
@@ -215,23 +235,31 @@ std::vector<Point<int>> Plotter::getPlotSamples(Plotter::size_type expressionInd
     return result;
 }
 
-std::pair<Point<int>, Point<std::string>> Plotter::getPoint(size_type expressionIndex, int x, int y) const
+std::pair<Point<int>, Point<std::string>> Plotter::getPointSelected(int x) const
 {
-	real real_x = yPxToPt(x);
-	real real_y;
-	Expression::setVariable("x", real_x);
-
-	real_y = expressions[expressionIndex].evaluate();
-
-	y = yPtToPx(real_y);
-
-	return std::pair<Point<int>, Point<std::string>>(
-		Point<int>(x, y),
-		Point<std::string>(
-			real_functions::toString(real_x),
-			real_functions::toString(real_y)
-		)
-	);
+    if (selectedExpression == npos)
+    {
+        return std::pair<Point<int>, Point<std::string>>(Point<int>(-1, -1), Point<std::string>("", ""));
+    }
+    else
+    {
+        real real_x = yPxToPt(x);
+        Expression::setVariable("x", real_x);
+        
+        real real_y = expressions[selectedExpression].evaluate();
+        
+        int y = yPtToPx(real_y);
+        
+        std::pair<Point<int>, Point<std::string>> point(
+            Point<int>(x, y),
+            Point<std::string>(real_functions::toString(real_x),
+                               real_functions::toString(real_y))
+        );
+        
+        return point;
+    }
+    
+    
 }
 
 Plotter::const_iterator Plotter::cbegin() const

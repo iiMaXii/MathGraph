@@ -10,8 +10,9 @@
 #include <iostream>
 #include <cmath>
 #include "real.h"
+#include <QIcon>
 
-RenderArea::RenderArea(QWidget *parent) :
+RenderArea::RenderArea(QWidget * parent) :
     QWidget(parent),
 	graphTool(MOVE),
     initialPosition(-1, -1),
@@ -26,6 +27,11 @@ RenderArea::RenderArea(QWidget *parent) :
     setCursor(Qt::OpenHandCursor);
     setBackgroundRole(QPalette::Base);
     setAutoFillBackground(true);
+    
+    // Cursors
+    zoomPlusCursor = QCursor(QIcon("/Users/Max/Desktop/cursor_zoom_plus.gif").pixmap(16, 16));
+    zoomMinusCursor = QCursor(QIcon("/Users/Max/Desktop/cursor_zoom_minus.gif").pixmap(16, 16));
+    cropCursor = QCursor(QIcon("/Users/Max/Desktop/cursor_crop.gif").pixmap(16, 16));
 }
 
 QSize RenderArea::minimumSizeHint() const
@@ -67,15 +73,36 @@ void RenderArea::setTool(GraphTool _graphTool)
             setCursor(Qt::CrossCursor);
             break;
         case ZOOM:
-            setCursor(Qt::ForbiddenCursor);
+            setCursor(zoomPlusCursor);
             break;
     }
+}
+
+void RenderArea::clearSelection()
+{
+    plotter.clearSelection();
+    
+    for (auto it = functionCache.begin(); it != functionCache.cend(); ++it)
+    {
+        it->first = false;
+    }
+    
+    update();
+}
+
+void RenderArea::select(Plotter::size_type expressionIndex)
+{
+    plotter.select(expressionIndex);
+    
+    functionCache[expressionIndex].first = true;
+    
+    update();
 }
 
 void RenderArea::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-	//painter.setPen(QPen(QBrush(Qt::black), 4));
+	painter.setPen(QPen(QBrush(Qt::black), 1));
 
     // x-axis
     Point<int> origo = plotter.getOrigo();
@@ -126,8 +153,14 @@ void RenderArea::paintEvent(QPaintEvent *)
     // Draw functions
 	for (auto it = functionCache.cbegin(); it != functionCache.cend(); ++it)
 	{
-		//painter.setPen(QPen(QBrush(Qt::black), 4));
-		painter.drawPath(it->second);
+        if (!it->second.isEmpty())
+        {
+            if (it->first) painter.setPen(QPen(QBrush(Qt::black), 3));
+            
+            painter.drawPath(it->second);
+            
+            if (it->first) painter.setPen(QPen(QBrush(Qt::black), 1));
+        }
 	}
     
     // Draw tools
@@ -148,6 +181,17 @@ void RenderArea::paintEvent(QPaintEvent *)
     painter.drawRect(QRect(0, 0, width() - 1, height() - 1));
 }
 
+void RenderArea::keyPressEvent(QKeyEvent * event)
+{
+    if (graphTool == ZOOM && QPoint::dotProduct(initialPosition, currentPosition) <= IGNORE_ZOOM_AREA)
+    {
+        if (event->key() & Qt::Key_Alt)
+            setCursor(zoomMinusCursor);
+        else
+            setCursor(zoomPlusCursor);
+    }
+}
+
 void RenderArea::mousePressEvent(QMouseEvent * event)
 {
     if (event->button() == Qt::LeftButton)
@@ -164,11 +208,9 @@ void RenderArea::mousePressEvent(QMouseEvent * event)
 				currentPosition = event->pos();
                 break;
             case ZOOM:
-                initialPosition = event->pos();
+                currentPosition = initialPosition = event->pos();
                 break;
 		}
-        
-        
     }
 }
 
@@ -186,13 +228,31 @@ void RenderArea::mouseReleaseEvent(QMouseEvent * event)
                 setCursor(Qt::OpenHandCursor);
                 break;
             case SELECTION:
-				currentPosition.setX(-1);
-				currentPosition.setX(-1);
+				plotter.getPointSelected(event->x());
                 break;
             case ZOOM:
-                std::cout << "(" << initialPosition.x() << ", " << initialPosition.y() << ")" << std::endl;
-                std::cout << "(" << currentPosition.x() << ", " << currentPosition.y() << ")" << std::endl;
-                plotter.setBounds(initialPosition.x(), currentPosition.x(), initialPosition.y(), currentPosition.y());
+                if (QPoint::dotProduct(initialPosition, currentPosition) <= IGNORE_ZOOM_AREA)
+                {
+                    if (event->modifiers() & Qt::AltModifier)
+                    { // Zoom out
+                        plotter.zoom(-1, event->x(), event->y());
+                    }
+                    else
+                    { // Zoom in
+                        plotter.zoom(1, event->x(), event->y());
+                    }
+                    
+                }
+                else
+                {
+                    plotter.setBounds(initialPosition.x(), currentPosition.x(), initialPosition.y(), currentPosition.y());
+                }
+                
+                if (event->modifiers() & Qt::Key_Alt)
+                    setCursor(zoomMinusCursor);
+                else
+                    setCursor(zoomPlusCursor);
+                
                 rebuildFunctionCache();
                 break;
 		}
@@ -219,6 +279,19 @@ void RenderArea::mouseMoveEvent(QMouseEvent * event)
             if (event->buttons() & Qt::LeftButton && leftDrag)
             {
                 currentPosition = event->pos();
+                
+                if (QPoint::dotProduct(initialPosition, currentPosition) <= IGNORE_ZOOM_AREA)
+                { // Normal zoom
+                    if (event->modifiers() & Qt::AltModifier)
+                        setCursor(zoomMinusCursor);
+                    else
+                        setCursor(zoomPlusCursor);
+                }
+                else
+                { // Box zoom
+                    setCursor(cropCursor);
+                }
+                
                 update();
             }
             break;
@@ -255,7 +328,7 @@ void RenderArea::move(const QPoint &newPosition)
     int xDiff = initialPosition.x() - newPosition.x();
     int yDiff = initialPosition.y() - newPosition.y();
     
-    if (xDiff != 0 && yDiff != 0)
+    if (xDiff != 0 || yDiff != 0)
     {
         plotter.move(xDiff, yDiff);
         rebuildFunctionCache();
@@ -270,19 +343,23 @@ void RenderArea::rebuildFunctionCache()
 {
     functionCache.clear();
     
-    Point<int> origo = plotter.getOrigo();
-    
     for (Plotter::size_type i = 0; i < plotter.numExpressions(); ++i)
     {
-        std::vector<Point<int>> s = plotter.getPlotSamples(i);
-        
-        QPainterPath functionPath(QPoint(0, origo.getY()));
-        
-        for (auto it = s.cbegin(); it != s.cend(); ++it)
+        if (plotter.isHidden(i))
         {
-            functionPath.lineTo(it->getX(), it->getY());
+            functionCache.emplace_back(false, QPainterPath());
         }
-        
-        functionCache.push_back(functionPath);
+        else
+        {
+            std::vector<Point<int>> s = plotter.getPlotSamples(i);
+            
+            QPainterPath functionPath;
+            for (const Point<int> &expr : s)
+            {
+                functionPath.lineTo(expr.getX(), expr.getY());
+            }
+            
+            functionCache.emplace_back(plotter.isSelected(i), functionPath);
+        }
     }
 }

@@ -28,7 +28,7 @@ class RenderArea : public QWidget
     Q_OBJECT
     
 public:
-    RenderArea(QWidget * parent = 0);
+    RenderArea(QWidget * parent = nullptr);
     
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
@@ -36,9 +36,13 @@ public:
     void addExpression(const Expression &expr);
     void centerOrigo();
 	void setTool(GraphTool _graphTool);
+    
+    void clearSelection();
+    void select(Plotter::size_type expressionIndex);
 protected:
     void paintEvent(QPaintEvent * event);
     
+    void keyPressEvent(QKeyEvent * event);
     void mousePressEvent(QMouseEvent * event);
     void mouseReleaseEvent(QMouseEvent * event);
     void mouseMoveEvent(QMouseEvent * event);
@@ -48,6 +52,12 @@ protected:
 private:
     void move(const QPoint &newPosition);
     void rebuildFunctionCache();
+    
+    const int IGNORE_ZOOM_AREA = 4; // No box zoom if area is less or equal
+    
+    QCursor zoomPlusCursor;
+    QCursor zoomMinusCursor;
+    QCursor cropCursor;
     
 	GraphTool graphTool;
     QPoint initialPosition; // Move and zoom start point

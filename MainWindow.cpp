@@ -28,8 +28,8 @@ MainWindow::MainWindow()
 	// Toolbar: Move tool button
     QPushButton * moveToolButton = new QPushButton(QIcon(), "");
 	moveToolButton->setToolTip("Move tool");
-	//moveToolButton->setIconSize(QSize(40, 40));
-	moveToolButton->setIcon(QIcon("/Users/Max/Desktop/cursor-openhand.png"));
+	moveToolButton->setIcon(QIcon("/Users/Max/Desktop/cursor_open_hand___.gif"));
+    moveToolButton->setIconSize(QSize(32, 32));
     
     moveToolButton->setMinimumWidth(50);
     moveToolButton->setMaximumWidth(50);
@@ -42,7 +42,7 @@ MainWindow::MainWindow()
     QPushButton * zoomToolButton = new QPushButton();
 	zoomToolButton->setToolTip("Zoom tool");
 	//zoomToolButton->setIconSize(QSize(32, 32));
-	zoomToolButton->setIcon(QIcon(":/images/cursor-zoom-plus.png"));
+	zoomToolButton->setIcon(QIcon("/Users/Max/Desktop/cursor_zoom_plus.gif"));
 
     zoomToolButton->setMinimumWidth(50);
     zoomToolButton->setMaximumWidth(50);
@@ -54,7 +54,7 @@ MainWindow::MainWindow()
 	// Toolbar: Selection tool button
     QPushButton * selectionToolButton = new QPushButton();
 	selectionToolButton->setToolTip("Selection tool");
-	selectionToolButton->setIcon(QIcon("/Users/Max/Desktop/cursor-cross.png"));
+	selectionToolButton->setIcon(QIcon("/Users/Max/Desktop/cursor_selector.gif"));
 
     selectionToolButton->setMinimumWidth(50);
     selectionToolButton->setMaximumWidth(50);
@@ -104,15 +104,19 @@ MainWindow::MainWindow()
     
 	// Set focus
 	expressionLineEdit->setFocus();
-
+    
     // Events
     connect(addExpressionButton, SIGNAL(clicked()), this, SLOT(addExpression()));
     connect(expressionLineEdit, SIGNAL(returnPressed()), addExpressionButton, SIGNAL(clicked()));
     
+    // Toolbar
     connect(centerOrigioButton, SIGNAL(clicked()), this, SLOT(centerOrigo()));
 	connect(moveToolButton, SIGNAL(clicked()), this, SLOT(setMoveTool()));
 	connect(zoomToolButton, SIGNAL(clicked()), this, SLOT(setZoomTool()));
 	connect(selectionToolButton, SIGNAL(clicked()), this, SLOT(setSelectionTool()));
+    
+    // Expression list
+    connect(expressionList, SIGNAL(itemSelectionChanged()), this, SLOT(expressionSelectionChanged()));
 }
 
 QSize MainWindow::sizeHint() const
@@ -135,6 +139,8 @@ void MainWindow::addExpression()
         QListWidgetItem * item = new QListWidgetItem(QString(expressionString.c_str()), expressionList);
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
         item->setCheckState(Qt::Checked);
+        
+        expressionLineEdit->setText("");
     }
     catch(InvalidExpression &e)
     {
@@ -160,4 +166,14 @@ void MainWindow::setSelectionTool()
 void MainWindow::setZoomTool()
 {
 	renderArea->setTool(ZOOM);
+}
+
+void MainWindow::expressionSelectionChanged()
+{
+    renderArea->clearSelection();
+    
+    for (int i = 0; i < expressionList->count(); ++i)
+    {
+        if (expressionList->item(i)->isSelected()) renderArea->select(i);
+    }
 }

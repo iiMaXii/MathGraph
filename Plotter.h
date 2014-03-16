@@ -17,6 +17,12 @@
 
 class Plotter
 {
+public:
+    typedef std::vector<Expression>::size_type size_type;
+	typedef std::vector<Expression>::const_iterator const_iterator;
+    const size_type npos = -1;
+    
+private:
     int pixelWidth;
     int pixelHeight;
     
@@ -30,6 +36,8 @@ class Plotter
     int pixelMarkerGap;
     
     std::vector<Expression> expressions;
+    std::vector<bool> expressionIsHidden;
+    size_type selectedExpression = npos;
     
 	int xPtToPx(real x) const;
 	int yPtToPx(real y) const;
@@ -38,14 +46,11 @@ class Plotter
 	real yPxToPt(int y) const;
 
 public:
-	typedef std::vector<Expression>::size_type size_type;
-	typedef std::vector<Expression>::const_iterator const_iterator;
-
 	Plotter(int _pixelWidth, int _pixelHeight, real _xMin, real _xMax, real _yMin, real _yMax, double _samplingRate = 2, int _pixelMarkerGap = 100);
     Plotter(int _pixelWidth, int _pixelHeight);
 	Plotter();
     
-	void addExpression(std::string expression);
+	void addExpression(const std::string &expression);
 	void addExpression(const Expression &expression);
     
     void centerOrigo();
@@ -62,9 +67,13 @@ public:
     std::vector<std::pair<int, std::string>> getYMarkers() const;
     
     size_type numExpressions() const;
+    void setHidden(size_type expressionIndex, bool hidden);
+    bool isHidden(size_type expressionIndex) const;
+    void select(size_type expressionIndex);
+    void clearSelection();
+    bool isSelected(size_type expressionIndex) const;
     std::vector<Point<int>> getPlotSamples(size_type expressionIndex) const;
-    //Point<real> getPoint(size_type expressionIndex, real x) const;
-	std::pair<Point<int>, Point<std::string>> getPoint(size_type expressionIndex, int x, int y) const;
+    std::pair<Point<int>, Point<std::string>> getPointSelected(int x) const;
 
 	const_iterator cbegin() const;
 	const_iterator cend() const;
