@@ -15,6 +15,12 @@
 #include <vector>
 #include <utility>
 
+class InvalidSelection : public std::logic_error
+{
+public:
+    InvalidSelection(const std::string& _what_arg);
+};
+
 class Plotter
 {
 public:
@@ -73,7 +79,7 @@ public:
     void clearSelection();
     bool isSelected(size_type expressionIndex) const;
     std::vector<Point<int>> getPlotSamples(size_type expressionIndex) const;
-    std::pair<Point<int>, Point<std::string>> getPointSelected(int x) const;
+    std::pair<Point<int>, Point<std::string>> getPointFromSelected(int x) const;
 
 	const_iterator cbegin() const;
 	const_iterator cend() const;

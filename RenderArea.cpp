@@ -18,7 +18,8 @@ RenderArea::RenderArea(QWidget * parent) :
     initialPosition(-1, -1),
     currentPosition(-1, -1),
     leftDrag(false),
-    plotter()
+    plotter(),
+    invalidSelectionErrorDialog(parent)
 {
 	Expression::addFunction("sin", real_functions::sin);
     Expression::addFunction("cos", real_functions::cos);
@@ -28,10 +29,13 @@ RenderArea::RenderArea(QWidget * parent) :
     setBackgroundRole(QPalette::Base);
     setAutoFillBackground(true);
     
+    invalidSelectionErrorDialog.setIcon(QMessageBox::Warning);
+    invalidSelectionErrorDialog.setText("u haz no functionz se1ect3d1!!!11! n00b");
+    
     // Cursors
-    zoomPlusCursor = QCursor(QIcon("/Users/Max/Desktop/cursor_zoom_plus.gif").pixmap(16, 16));
-    zoomMinusCursor = QCursor(QIcon("/Users/Max/Desktop/cursor_zoom_minus.gif").pixmap(16, 16));
-    cropCursor = QCursor(QIcon("/Users/Max/Desktop/cursor_crop.gif").pixmap(16, 16));
+    zoomPlusCursor = QCursor(QIcon(":images/cursor_zoom_plus.gif").pixmap(16, 16));
+    zoomMinusCursor = QCursor(QIcon(":images/cursor_zoom_minus.gif").pixmap(16, 16));
+    cropCursor = QCursor(QIcon(":images/cursor_crop.gif").pixmap(16, 16));
 }
 
 QSize RenderArea::minimumSizeHint() const
@@ -44,17 +48,21 @@ QSize RenderArea::sizeHint() const
     return QSize(400, 300);
 }
 
-void RenderArea::addExpression(const Expression &expr)
+Plotter::size_type RenderArea::addExpression(const Expression &expr)
 {
     plotter.addExpression(expr);
     
     rebuildFunctionCache();
     update();
+    
+    return plotter.numExpressions() - 1;
 }
 
 void RenderArea::centerOrigo()
 {
     plotter.centerOrigo();
+    
+    selectedCoordinateString.clear();
     
     rebuildFunctionCache();
     update();
@@ -68,9 +76,11 @@ void RenderArea::setTool(GraphTool _graphTool)
     {
         case MOVE:
             setCursor(Qt::OpenHandCursor);
+            selectedCoordinateString.clear();
             break;
         case SELECTION:
             setCursor(Qt::CrossCursor);
+            selectedCoordinateString.clear();
             break;
         case ZOOM:
             setCursor(zoomPlusCursor);
@@ -99,10 +109,32 @@ void RenderArea::select(Plotter::size_type expressionIndex)
     update();
 }
 
+void RenderArea::setEnabled(Plotter::size_type expressionIndex, bool enabled)
+{
+    if (plotter.isHidden(expressionIndex) == enabled)
+    { // Change!
+        
+        plotter.setHidden(expressionIndex, !enabled);
+        
+        if (enabled)
+        {
+            rebuildFunctionCache();
+        }
+        else
+        {
+            functionCache[expressionIndex].second = QPainterPath();
+        }
+        
+        update();
+    }
+}
+
 void RenderArea::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-	painter.setPen(QPen(QBrush(Qt::black), 1));
+    QPen normalPen = QPen(QBrush(Qt::black), 1);
+    QPen boldPen = QPen(QBrush(Qt::black), 3);
+	painter.setPen(normalPen);
 
     // x-axis
     Point<int> origo = plotter.getOrigo();
@@ -151,29 +183,50 @@ void RenderArea::paintEvent(QPaintEvent *)
     }
     
     // Draw functions
-	for (auto it = functionCache.cbegin(); it != functionCache.cend(); ++it)
+    for (size_type i = 0; i != functionCache.size(); ++i)
 	{
-        if (!it->second.isEmpty())
+        if (!functionCache[i].second.isEmpty())
         {
-            if (it->first) painter.setPen(QPen(QBrush(Qt::black), 3));
+            if (functionCache[i].first)
+            {
+                boldPen.setColor(FUNCTION_COLOURS[i % FUNCTION_COLOURS.size()]);
+                painter.setPen(boldPen);
+            }
+            else
+            {
+                normalPen.setColor(FUNCTION_COLOURS[i % FUNCTION_COLOURS.size()]);
+                painter.setPen(normalPen);
+            }
             
-            painter.drawPath(it->second);
+            painter.drawPath(functionCache[i].second);
             
-            if (it->first) painter.setPen(QPen(QBrush(Qt::black), 1));
+            painter.setPen(normalPen);
         }
 	}
     
+    normalPen.setColor(Qt::black);
+    painter.setPen(normalPen);
+    
     // Draw tools
-    if (leftDrag)
+    if (leftDrag && graphTool == ZOOM && !ignoreZoomBox(initialPosition, currentPosition))
     {
-        switch (graphTool)
-        {
-            case ZOOM:
-                painter.setPen(Qt::DashLine);
-                painter.setBrush(Qt::NoBrush);
-                painter.drawRect(QRect(initialPosition, currentPosition));
-                break;
-        }
+        painter.setPen(Qt::DashLine);
+        painter.setBrush(Qt::NoBrush);
+        painter.drawRect(QRect(initialPosition, currentPosition));
+    }
+    
+    if (graphTool == SELECTION && !selectedCoordinateString.isEmpty())
+    {
+        painter.setBrush(Qt::black);
+        //painter.drawEllipse(initialPosition, 5, 5);
+        painter.drawLine(initialPosition.x()+2, initialPosition.y(), initialPosition.x()+5, initialPosition.y());
+        painter.drawLine(initialPosition.x(), initialPosition.y()+2, initialPosition.x(), initialPosition.y()+5);
+        painter.drawLine(initialPosition.x(), initialPosition.y()-2, initialPosition.x(), initialPosition.y()-5);
+        painter.drawLine(initialPosition.x()-2, initialPosition.y(), initialPosition.x()-5, initialPosition.y());
+        //painter.drawEllipse(QRect(initialPosition.x()-3, initialPosition.y()-3, 4, 4));
+        painter.setBrush(Qt::NoBrush);
+        //painter.drawLine(initialPosition, currentPosition);
+        painter.drawText(currentPosition, selectedCoordinateString);
     }
     
     painter.setPen(palette().dark().color());
@@ -183,12 +236,17 @@ void RenderArea::paintEvent(QPaintEvent *)
 
 void RenderArea::keyPressEvent(QKeyEvent * event)
 {
-    if (graphTool == ZOOM && QPoint::dotProduct(initialPosition, currentPosition) <= IGNORE_ZOOM_AREA)
+    if (graphTool == ZOOM && event->key() & Qt::Key_Alt && ignoreZoomBox(initialPosition, currentPosition))
     {
-        if (event->key() & Qt::Key_Alt)
-            setCursor(zoomMinusCursor);
-        else
-            setCursor(zoomPlusCursor);
+        setCursor(zoomMinusCursor);
+    }
+}
+
+void RenderArea::keyReleaseEvent(QKeyEvent * event)
+{
+    if (graphTool == ZOOM && event->key() & Qt::Key_Alt && ignoreZoomBox(initialPosition, currentPosition))
+    {
+        setCursor(zoomPlusCursor);
     }
 }
 
@@ -205,7 +263,7 @@ void RenderArea::mousePressEvent(QMouseEvent * event)
                 setCursor(Qt::ClosedHandCursor);
                 break;
             case SELECTION:
-				currentPosition = event->pos();
+				initialPosition = event->pos();
                 break;
             case ZOOM:
                 currentPosition = initialPosition = event->pos();
@@ -228,10 +286,29 @@ void RenderArea::mouseReleaseEvent(QMouseEvent * event)
                 setCursor(Qt::OpenHandCursor);
                 break;
             case SELECTION:
-				plotter.getPointSelected(event->x());
+            {
+                try
+                {
+                    std::pair<Point<int>, Point<std::string>> selectedPoint = plotter.getPointFromSelected(event->x());
+                    selectedCoordinateString = "(";
+                    selectedCoordinateString += selectedPoint.second.getX().c_str();
+                    selectedCoordinateString += ", ";
+                    selectedCoordinateString += selectedPoint.second.getY().c_str();
+                    selectedCoordinateString += ")";
+                    
+                    initialPosition = QPoint(selectedPoint.first.getX(), selectedPoint.first.getY());
+                    currentPosition = event->pos();
+                }
+                catch (InvalidSelection &)
+                {
+                    selectedCoordinateString.clear();
+                    
+                    invalidSelectionErrorDialog.exec();
+                }
+            }
                 break;
             case ZOOM:
-                if (QPoint::dotProduct(initialPosition, currentPosition) <= IGNORE_ZOOM_AREA)
+                if (ignoreZoomBox(initialPosition, currentPosition))
                 {
                     if (event->modifiers() & Qt::AltModifier)
                     { // Zoom out
@@ -241,17 +318,20 @@ void RenderArea::mouseReleaseEvent(QMouseEvent * event)
                     { // Zoom in
                         plotter.zoom(1, event->x(), event->y());
                     }
-                    
                 }
                 else
                 {
                     plotter.setBounds(initialPosition.x(), currentPosition.x(), initialPosition.y(), currentPosition.y());
+                    
+                    // Reset cursor
+                    if (event->modifiers() & Qt::AltModifier)
+                        setCursor(zoomMinusCursor);
+                    else
+                        setCursor(zoomPlusCursor);
+                    
+                    // Reset position
+                    initialPosition = currentPosition = event->pos();
                 }
-                
-                if (event->modifiers() & Qt::Key_Alt)
-                    setCursor(zoomMinusCursor);
-                else
-                    setCursor(zoomPlusCursor);
                 
                 rebuildFunctionCache();
                 break;
@@ -280,7 +360,7 @@ void RenderArea::mouseMoveEvent(QMouseEvent * event)
             {
                 currentPosition = event->pos();
                 
-                if (QPoint::dotProduct(initialPosition, currentPosition) <= IGNORE_ZOOM_AREA)
+                if (ignoreZoomBox(initialPosition, currentPosition))
                 { // Normal zoom
                     if (event->modifiers() & Qt::AltModifier)
                         setCursor(zoomMinusCursor);
@@ -296,8 +376,6 @@ void RenderArea::mouseMoveEvent(QMouseEvent * event)
             }
             break;
     }
-    
-
 }
 
 void RenderArea::wheelEvent(QWheelEvent * event)
@@ -307,6 +385,8 @@ void RenderArea::wheelEvent(QWheelEvent * event)
     if(!numPixels.isNull())
     {
         plotter.zoom(numPixels.y(), event->x(), event->y());
+        
+        selectedCoordinateString.clear();
         
         rebuildFunctionCache();
         update();
@@ -352,14 +432,26 @@ void RenderArea::rebuildFunctionCache()
         else
         {
             std::vector<Point<int>> s = plotter.getPlotSamples(i);
-            
+
             QPainterPath functionPath;
-            for (const Point<int> &expr : s)
+            
+            if (!s.empty())
             {
-                functionPath.lineTo(expr.getX(), expr.getY());
+                Point<int> firstPoint = s.front();
+                functionPath.moveTo(firstPoint.getX(), firstPoint.getY());
+                
+                for (const Point<int> &expr : s)
+                {
+                    functionPath.lineTo(expr.getX(), expr.getY());
+                }
             }
             
             functionCache.emplace_back(plotter.isSelected(i), functionPath);
         }
     }
+}
+
+bool RenderArea::ignoreZoomBox(const QPoint &begin, const QPoint &end)
+{
+    return std::abs(end.x() - begin.x()) + std::abs(end.y() - begin.y()) <= IGNORE_ZOOM_BOX; // Manhattan length as in QPoint::manhattanLength()
 }

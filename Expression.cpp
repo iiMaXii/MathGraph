@@ -8,7 +8,6 @@
 
 #include "Expression.h"
 #include "TokenReader.h"
-#include "DEBUG.h"
 
 #include <iostream>
 #include <stack>
@@ -89,8 +88,6 @@ Expression::Expression(string expression)
 {
     stack<string> tempStack;
     queue<string> outputQueue;
-    
-    LOG_DEBUG("Expression(std::string) Parsing: \"" << expression << "\"");
     
     TokenReader r(expression);
     string token;
@@ -207,25 +204,6 @@ Expression::Expression(string expression)
                 break;
         }
         
-#ifdef DEBUG
-        cout << token << "\t|\t";
-        queue<string> copyOutputQueue = outputQueue;
-        while (!copyOutputQueue.empty())
-        {
-            cout << copyOutputQueue.front() << " ";
-            copyOutputQueue.pop();
-        }
-        cout << "\t|\t";
-        stack<string> copyTempStack = tempStack;
-        while (!copyTempStack.empty())
-        {
-            cout << copyTempStack.top() << " ";
-            copyTempStack.pop();
-        }
-        cout << '(' << numOperands << ')';
-        cout << endl;
-#endif /* defined(DEBUG) */
-        
         if (1 < numOperands)
         {
             throw InvalidExpression("Operand overflow", InvalidExpression::OPERAND_OVERFLOW, 0, expression.length());
@@ -253,8 +231,6 @@ Expression::Expression(string expression)
         compiledExpression += outputQueue.front() + " ";
         outputQueue.pop();
     }
-    
-    LOG_DEBUG("Expression(std::string) Result: \"" << compiledExpression << "\"");
 }
 
 real Expression::evaluate() const

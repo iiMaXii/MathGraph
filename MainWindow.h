@@ -20,7 +20,6 @@ class MainWindow : public QWidget
     
 public:
     MainWindow();
-    
     QSize sizeHint() const;
 public slots:
     void addExpression();
@@ -30,7 +29,11 @@ public slots:
 	void setSelectionTool();
 	void setZoomTool();
     
+    void expressionChanged(QListWidgetItem * item);
     void expressionSelectionChanged();
+protected:
+    void keyPressEvent(QKeyEvent * event);
+    void keyReleaseEvent(QKeyEvent * event);
 private:
     QListWidget * expressionList;
     RenderArea * renderArea;

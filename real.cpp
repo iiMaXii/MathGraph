@@ -14,7 +14,9 @@ bool real_functions::parseReal(const std::string &str, long double &real)
     try {
         real = stold(str);
         return true;
-    } catch (std::exception &) {
+    }
+    catch (std::exception &)
+    {
         return false;
     }
 }
@@ -35,5 +37,3 @@ std::string real_functions::toString(real value)
     
     return result;
 }
-
-//sin_ff = static_cast<real(*)(real)>(std::sin);

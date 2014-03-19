@@ -6,10 +6,12 @@
 //
 //
 
-#include <iostream>
 #include "Plotter.h"
 #include <cmath>
-#include <limits>
+
+InvalidSelection::InvalidSelection(const std::string& _what_arg)
+: std::logic_error(_what_arg)
+{}
 
 int Plotter::xPtToPx(real x) const
 {
@@ -117,9 +119,6 @@ void Plotter::zoom(int steps, int x, int y)
         
         real yMaxPercentage = static_cast<real>(y) / pixelHeight;
         real yMinPercentage = 1 - yMaxPercentage;
-        
-        std::cout << "xModifier: " << xMinPercentage << ", " << xMaxPercentage << std::endl;
-        std::cout << "yModifier: " << yMinPercentage << ", " << yMaxPercentage << std::endl;
         
         if (steps < 0)
         {
@@ -235,15 +234,15 @@ std::vector<Point<int>> Plotter::getPlotSamples(Plotter::size_type expressionInd
     return result;
 }
 
-std::pair<Point<int>, Point<std::string>> Plotter::getPointSelected(int x) const
+std::pair<Point<int>, Point<std::string>> Plotter::getPointFromSelected(int x) const
 {
     if (selectedExpression == npos)
     {
-        return std::pair<Point<int>, Point<std::string>>(Point<int>(-1, -1), Point<std::string>("", ""));
+        throw InvalidSelection("No expression selected");
     }
     else
     {
-        real real_x = yPxToPt(x);
+        real real_x = xPxToPt(x);
         Expression::setVariable("x", real_x);
         
         real real_y = expressions[selectedExpression].evaluate();
@@ -258,8 +257,6 @@ std::pair<Point<int>, Point<std::string>> Plotter::getPointSelected(int x) const
         
         return point;
     }
-    
-    
 }
 
 Plotter::const_iterator Plotter::cbegin() const

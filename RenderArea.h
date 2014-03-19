@@ -14,6 +14,8 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <vector>
+#include <array>
+#include <QMessageBox>
 #include "Plotter.h"
 
 enum GraphTool
@@ -28,21 +30,26 @@ class RenderArea : public QWidget
     Q_OBJECT
     
 public:
+    const std::array<QColor, 10> FUNCTION_COLOURS = {{Qt::blue, Qt::red, Qt::green, Qt::cyan, Qt::magenta, Qt::black, Qt::darkMagenta, Qt::darkYellow, Qt::gray, Qt::lightGray}};
+    
     RenderArea(QWidget * parent = nullptr);
     
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
     
-    void addExpression(const Expression &expr);
+    Plotter::size_type addExpression(const Expression &expr);
     void centerOrigo();
 	void setTool(GraphTool _graphTool);
     
     void clearSelection();
     void select(Plotter::size_type expressionIndex);
+    void setEnabled(Plotter::size_type expressionIndex, bool enabled);
+    
+    void keyPressEvent(QKeyEvent * event);
+    void keyReleaseEvent(QKeyEvent * event);
 protected:
     void paintEvent(QPaintEvent * event);
     
-    void keyPressEvent(QKeyEvent * event);
     void mousePressEvent(QMouseEvent * event);
     void mouseReleaseEvent(QMouseEvent * event);
     void mouseMoveEvent(QMouseEvent * event);
@@ -53,19 +60,24 @@ private:
     void move(const QPoint &newPosition);
     void rebuildFunctionCache();
     
-    const int IGNORE_ZOOM_AREA = 4; // No box zoom if area is less or equal
+    const int IGNORE_ZOOM_BOX = 8; // No box zoom if area is less or equal
+    bool ignoreZoomBox(const QPoint &begin, const QPoint &end);
     
     QCursor zoomPlusCursor;
     QCursor zoomMinusCursor;
     QCursor cropCursor;
     
 	GraphTool graphTool;
-    QPoint initialPosition; // Move and zoom start point
-    QPoint currentPosition; // Zoom end point
-    bool leftDrag;
+    QPoint initialPosition; // Move, zoom start point,
+    QPoint currentPosition; // Zoom end point,
+    bool leftDrag; // In case dragging started outside widget
+    QString selectedCoordinateString;
     
     Plotter plotter;
     std::vector<std::pair<bool, QPainterPath>> functionCache;
+    typedef std::vector<std::pair<bool, QPainterPath>>::size_type size_type;
+    
+    QMessageBox invalidSelectionErrorDialog;
 };
 
 #endif /* defined(__MathGraph__RenderArea__) */

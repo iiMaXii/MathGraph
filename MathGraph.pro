@@ -20,7 +20,8 @@ SOURCES +=  Expression.cpp \
             RenderArea.cpp \
             TokenReader.cpp \
             main.cpp \
-            real.cpp
+            real.cpp \
+            QListWidgetFunctionItem.cpp
 
 HEADERS  += DEBUG.h \
             Expression.h \
@@ -29,4 +30,5 @@ HEADERS  += DEBUG.h \
             Point.h \
             RenderArea.h \
             TokenReader.h \
-            real.h
+            real.h \
+            QListWidgetFunctionItem.h

@@ -6,14 +6,18 @@
 //
 //
 
+#include <iostream>
+
 #include "MainWindow.h"
 #include "Expression.h"
+#include "QListWidgetFunctionItem.h"
 
 #include <QCursor>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QSplitter>
+
 
 MainWindow::MainWindow()
 : QWidget()
@@ -28,7 +32,7 @@ MainWindow::MainWindow()
 	// Toolbar: Move tool button
     QPushButton * moveToolButton = new QPushButton(QIcon(), "");
 	moveToolButton->setToolTip("Move tool");
-	moveToolButton->setIcon(QIcon("/Users/Max/Desktop/cursor_open_hand___.gif"));
+	moveToolButton->setIcon(QIcon(":images/cursor_open_hand.gif"));
     moveToolButton->setIconSize(QSize(32, 32));
     
     moveToolButton->setMinimumWidth(50);
@@ -42,7 +46,7 @@ MainWindow::MainWindow()
     QPushButton * zoomToolButton = new QPushButton();
 	zoomToolButton->setToolTip("Zoom tool");
 	//zoomToolButton->setIconSize(QSize(32, 32));
-	zoomToolButton->setIcon(QIcon("/Users/Max/Desktop/cursor_zoom_plus.gif"));
+	zoomToolButton->setIcon(QIcon(":images/cursor_zoom_plus.gif"));
 
     zoomToolButton->setMinimumWidth(50);
     zoomToolButton->setMaximumWidth(50);
@@ -54,7 +58,7 @@ MainWindow::MainWindow()
 	// Toolbar: Selection tool button
     QPushButton * selectionToolButton = new QPushButton();
 	selectionToolButton->setToolTip("Selection tool");
-	selectionToolButton->setIcon(QIcon("/Users/Max/Desktop/cursor_selector.gif"));
+	selectionToolButton->setIcon(QIcon(":images/cursor_selector.gif"));
 
     selectionToolButton->setMinimumWidth(50);
     selectionToolButton->setMaximumWidth(50);
@@ -116,6 +120,7 @@ MainWindow::MainWindow()
 	connect(selectionToolButton, SIGNAL(clicked()), this, SLOT(setSelectionTool()));
     
     // Expression list
+    connect(expressionList, SIGNAL(itemChanged(QListWidgetItem *)), this, SLOT(expressionChanged(QListWidgetItem *))); // used to check for checked items
     connect(expressionList, SIGNAL(itemSelectionChanged()), this, SLOT(expressionSelectionChanged()));
 }
 
@@ -134,11 +139,11 @@ void MainWindow::addExpression()
         
         expressionLineEdit->setStyleSheet("");
         
-        renderArea->addExpression(expr);
+        Plotter::size_type plotterItemIndex = renderArea->addExpression(expr);
         
-        QListWidgetItem * item = new QListWidgetItem(QString(expressionString.c_str()), expressionList);
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-        item->setCheckState(Qt::Checked);
+        QListWidgetItem * item = new QListWidgetFunctionItem(plotterItemIndex, renderArea->FUNCTION_COLOURS[plotterItemIndex % renderArea->FUNCTION_COLOURS.size()], expressionString.c_str());
+        
+        expressionList->addItem(item);
         
         expressionLineEdit->setText("");
     }
@@ -168,6 +173,13 @@ void MainWindow::setZoomTool()
 	renderArea->setTool(ZOOM);
 }
 
+void MainWindow::expressionChanged(QListWidgetItem * item)
+{
+    QListWidgetFunctionItem * functionItem = static_cast<QListWidgetFunctionItem *>(item);
+    
+    renderArea->setEnabled(functionItem->getPlotterIndex(), functionItem->checkState() == Qt::Checked);
+}
+
 void MainWindow::expressionSelectionChanged()
 {
     renderArea->clearSelection();
@@ -176,4 +188,14 @@ void MainWindow::expressionSelectionChanged()
     {
         if (expressionList->item(i)->isSelected()) renderArea->select(i);
     }
+}
+
+void MainWindow::keyPressEvent(QKeyEvent * event)
+{
+    renderArea->keyPressEvent(event);
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent * event)
+{
+    renderArea->keyReleaseEvent(event);
 }

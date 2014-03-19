@@ -1,7 +1,10 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
 <qresource>
-    <file>images/cursor-zoom-plus.png</file>
-    <file>images/cursor-zoom-minus.png</file>
+    <file>images/cursor_crop.gif</file>
+    <file>images/cursor_open_hand.gif</file>
+    <file>images/cursor_selector.gif</file>
+    <file>images/cursor_zoom_minus.gif</file>
+    <file>images/cursor_zoom_plus.gif</file>
 </qresource>
 </RCC>
