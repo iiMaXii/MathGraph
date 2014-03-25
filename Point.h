@@ -15,6 +15,7 @@ template<typename T>
 class Point
 {
     T x, y;
+    
 public:
     Point(T _x, T _y);
     
@@ -29,9 +30,7 @@ public:
 };
 
 template<typename T>
-Point<T>::Point(T _x, T _y)
-: x(_x), y(_y)
-{}
+Point<T>::Point(T _x, T _y) : x(_x), y(_y) {}
 
 template<typename T>
 T Point<T>::getX() const

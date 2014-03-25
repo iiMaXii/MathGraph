@@ -12,12 +12,12 @@
 #include <iostream>
 #include <stack>
 #include <queue>
-#include <cmath>
 
-using namespace std;
-
-InvalidExpression::InvalidExpression(const std::string& _what_arg, ErrorType _errorType, size_type _position, size_type _length)
-: invalid_argument(_what_arg), errorType(_errorType), position(_position), length(_length)
+InvalidExpression::InvalidExpression(const std::string &_what_arg, ErrorType _errorType, size_type _position, size_type _length)
+    : invalid_argument(_what_arg),
+      errorType(_errorType),
+      position(_position),
+      length(_length)
 {}
 
 InvalidExpression::ErrorType InvalidExpression::getError() const
@@ -37,14 +37,14 @@ InvalidExpression::size_type InvalidExpression::getLength() const
 
 // ---------------- BEGIN STATIC ---------------- //
 
-map<string, const real> Expression::constants = {
+std::map<std::string, const real> Expression::constants = {
     {"pi", 3.141592653589793238462643383279502884197169399375105820974944},
     {"e",  2.718281828459045235360287471352662497757247093699959574966967}
 };
 
-map<string, real> Expression::variables;
+std::map<std::string, real> Expression::variables;
 
-map<string, real (*)(real)> Expression::functions;
+std::map<std::string, real (*)(real)> Expression::functions;
 
 bool Expression::addVariable(std::string name, real initialValue)
 {
@@ -60,7 +60,7 @@ bool Expression::addVariable(std::string name, real initialValue)
     return wasCreated;
 }
 
-bool Expression::setVariable(string name, real value)
+bool Expression::setVariable(std::string name, real value)
 {
     bool exists = false;
     
@@ -74,7 +74,7 @@ bool Expression::setVariable(string name, real value)
     return exists;
 }
 
-void Expression::addFunction(string name, real (*functionPointer)(real))
+void Expression::addFunction(std::string name, real (*functionPointer)(real))
 {
     functions[name] = functionPointer;
 }
@@ -83,14 +83,14 @@ void Expression::addFunction(string name, real (*functionPointer)(real))
 
 Expression::Expression() {}
 
-Expression::Expression(string expression)
-: Expression()
+Expression::Expression(std::string expression)
+    : Expression()
 {
-    stack<string> tempStack;
-    queue<string> outputQueue;
+    std::stack<std::string> tempStack;
+    std::queue<std::string> outputQueue;
     
     TokenReader r(expression);
-    string token;
+    std::string token;
     
     bool isUnary = true;
     int numOperands = 0;
@@ -111,7 +111,7 @@ Expression::Expression(string expression)
             case NAME:
                 if (constants.find(token) != constants.end())
                 { // constant
-                    outputQueue.push(to_string(constants[token])); // Add multiplication if next is '(', number, variable
+                    outputQueue.push(real_functions::toString(constants[token])); // Add multiplication if next is '(', number, variable
                     
                     isUnary = false;
                     ++numOperands;
@@ -188,7 +188,7 @@ Expression::Expression(string expression)
                 
                 tempStack.pop(); // Discard '('
                 
-                if (functions.find(tempStack.top()) != functions.end())
+                if (!tempStack.empty() && functions.find(tempStack.top()) != functions.end())
                 {
                     outputQueue.push(tempStack.top());
                     tempStack.pop();
@@ -235,9 +235,9 @@ Expression::Expression(string expression)
 
 real Expression::evaluate() const
 {
-    istringstream expressionStream(compiledExpression);
-    stack<real> numberStack;
-    string token;
+    std::istringstream expressionStream(compiledExpression);
+    std::stack<real> numberStack;
+    std::string token;
     
     while (expressionStream >> token)
     {
@@ -259,8 +259,7 @@ real Expression::evaluate() const
                 }
                 else
                 {
-                    cout << "Error! No function " << token << " exists." << endl;
-                    return 0;
+                    std::cout << "Error! No function " << token << " exists." << std::endl;
                 }
             }
         }
@@ -271,8 +270,7 @@ real Expression::evaluate() const
                 real firstOperand = numberStack.top();
                 numberStack.pop();
                 
-                // There is only one unary operator
-                numberStack.push(-firstOperand);
+                numberStack.push(-firstOperand); // There is only one unary operator
             }
             else
             {
@@ -283,7 +281,7 @@ real Expression::evaluate() const
                 
                 if (token.size() != 1)
                 {
-                    cout << "ERROR! Operator size != 1" << endl;
+                    std::cout << "ERROR! Operator size != 1" << std::endl;
                 }
                 else
                 {
@@ -305,18 +303,19 @@ real Expression::evaluate() const
                             numberStack.push(real_functions::pow(firstOperand, secondOperand));
                             break;
                         default:
-                            cout << "ERROR! Unkown operator: " << token << endl;
+                            std::cout << "ERROR! Unkown operator: " << token << std::endl;
                             break;
                     }
                 }
             }
-        } else if (real_functions::parseReal(token, number))
+        }
+        else if (real_functions::parseReal(token, number))
         {
             numberStack.push(number);
         }
         else
         {
-            cout << "ERROR! Unkown token '" << token << "'" << endl;
+            std::cout << "ERROR! Unkown token '" << token << "'" << std::endl;
         }
     }
     

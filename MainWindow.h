@@ -10,6 +10,7 @@
 #define __MathGraph__MainWindow__
 
 #include "RenderArea.h"
+
 #include <QWidget>
 #include <QListWidget>
 #include <QLineEdit>
@@ -21,23 +22,26 @@ class MainWindow : public QWidget
 public:
     MainWindow();
     QSize sizeHint() const;
+    
 public slots:
     void addExpression();
     
     void centerOrigo();
-	void setMoveTool();
-	void setSelectionTool();
-	void setZoomTool();
+    void setMoveTool();
+    void setSelectionTool();
+    void setZoomTool();
     
-    void expressionChanged(QListWidgetItem * item);
+    void expressionChanged(QListWidgetItem *item);
     void expressionSelectionChanged();
+    
 protected:
-    void keyPressEvent(QKeyEvent * event);
-    void keyReleaseEvent(QKeyEvent * event);
+    void keyPressEvent(QKeyEvent *event);
+    void keyReleaseEvent(QKeyEvent *event);
+    
 private:
-    QListWidget * expressionList;
-    RenderArea * renderArea;
-    QLineEdit * expressionLineEdit;
+    QListWidget *expressionList;
+    RenderArea *renderArea;
+    QLineEdit *expressionLineEdit;
 };
 
 #endif /* defined(__MathGraph__MainWindow__) */

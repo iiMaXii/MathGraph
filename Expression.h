@@ -10,13 +10,15 @@
 #define __MathGraph__Expression__
 
 #include "real.h"
-#include <string>
+
 #include <map>
 #include <stdexcept>
 
 class InvalidExpression : public std::invalid_argument
 {
 public:
+    typedef std::string::size_type size_type;
+    
     enum ErrorType {
         UNDEFINED_NAME,
         INVALID_UNARY_OPERATOR,
@@ -25,18 +27,17 @@ public:
         OPERAND_UNDERFLOW,
         OPERAND_OVERFLOW
     };
-private:
-    typedef std::string::size_type size_type;
     
-    ErrorType errorType;
-    size_type position;
-    size_type length;
-public:
-    InvalidExpression(const std::string& _what_arg, ErrorType _errorType, size_type _position, size_type _length);
+    InvalidExpression(const std::string &_what_arg, ErrorType _errorType, size_type _position, size_type _length);
     
     ErrorType getError() const;
     size_type getPosition() const;
     size_type getLength() const;
+    
+private:
+    ErrorType errorType;
+    size_type position;
+    size_type length;
 };
 
 class Expression
@@ -46,6 +47,7 @@ class Expression
     static std::map<std::string, real (*)(real)> functions;
     
     std::string compiledExpression;
+    
 public:
     static bool addVariable(std::string name, real initialValue);
     static bool setVariable(std::string name, real value);

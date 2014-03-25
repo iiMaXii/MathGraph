@@ -7,21 +7,24 @@
 //
 
 #include "renderarea.h"
-#include <iostream>
-#include <cmath>
 #include "real.h"
+
 #include <QIcon>
 
-RenderArea::RenderArea(QWidget * parent) :
-    QWidget(parent),
-	graphTool(MOVE),
-    initialPosition(-1, -1),
-    currentPosition(-1, -1),
-    leftDrag(false),
-    plotter(),
-    invalidSelectionErrorDialog(parent)
+#include <iostream>
+#include <cmath>
+
+RenderArea::RenderArea(QWidget *_parent)
+    : QWidget(_parent),
+      graphTool(MOVE),
+      initialPosition(-1, -1),
+      currentPosition(-1, -1),
+      leftDrag(false),
+      selectedCoordinateString(),
+      plotter(),
+      invalidSelectionErrorDialog(_parent)
 {
-	Expression::addFunction("sin", real_functions::sin);
+    Expression::addFunction("sin", real_functions::sin);
     Expression::addFunction("cos", real_functions::cos);
     Expression::addFunction("tan", real_functions::tan);
     
@@ -70,7 +73,7 @@ void RenderArea::centerOrigo()
 
 void RenderArea::setTool(GraphTool _graphTool)
 {
-	graphTool = _graphTool;
+    graphTool = _graphTool;
     
     switch(graphTool)
     {
@@ -132,10 +135,11 @@ void RenderArea::setEnabled(Plotter::size_type expressionIndex, bool enabled)
 void RenderArea::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
+    QFontMetrics currentFontMetrics = fontMetrics();
     QPen normalPen = QPen(QBrush(Qt::black), 1);
     QPen boldPen = QPen(QBrush(Qt::black), 3);
-	painter.setPen(normalPen);
-
+    painter.setPen(normalPen);
+    
     // x-axis
     Point<int> origo = plotter.getOrigo();
     
@@ -159,8 +163,6 @@ void RenderArea::paintEvent(QPaintEvent *)
     painter.fillPath(yAxisArrow, QBrush(Qt::black));
     
     // X markers
-    QFontMetrics currentFontMetrics = fontMetrics();
-    
     std::vector<std::pair<int, std::string>> xMarkers = plotter.getXMarkers();
     for (auto it = xMarkers.cbegin(); it != xMarkers.cend(); ++it)
     {
@@ -178,23 +180,23 @@ void RenderArea::paintEvent(QPaintEvent *)
     {
         int currentPosition = it->first;
         
-        painter.drawText(origo.getX() + 8, currentPosition + 5, tr(it->second.c_str()));
+        painter.drawText(origo.getX() + 8, currentPosition + 5, it->second.c_str());
         painter.drawLine(origo.getX() - 3, currentPosition, origo.getX() + 3, currentPosition);
     }
     
     // Draw functions
     for (size_type i = 0; i != functionCache.size(); ++i)
-	{
+    {
         if (!functionCache[i].second.isEmpty())
         {
             if (functionCache[i].first)
             {
-                boldPen.setColor(FUNCTION_COLOURS[i % FUNCTION_COLOURS.size()]);
+                boldPen.setColor(FUNCTION_COLORS[i % FUNCTION_COLORS.size()]);
                 painter.setPen(boldPen);
             }
             else
             {
-                normalPen.setColor(FUNCTION_COLOURS[i % FUNCTION_COLOURS.size()]);
+                normalPen.setColor(FUNCTION_COLORS[i % FUNCTION_COLORS.size()]);
                 painter.setPen(normalPen);
             }
             
@@ -202,7 +204,7 @@ void RenderArea::paintEvent(QPaintEvent *)
             
             painter.setPen(normalPen);
         }
-	}
+    }
     
     normalPen.setColor(Qt::black);
     painter.setPen(normalPen);
@@ -218,15 +220,15 @@ void RenderArea::paintEvent(QPaintEvent *)
     if (graphTool == SELECTION && !selectedCoordinateString.isEmpty())
     {
         painter.setBrush(Qt::black);
-        //painter.drawEllipse(initialPosition, 5, 5);
+        
         painter.drawLine(initialPosition.x()+2, initialPosition.y(), initialPosition.x()+5, initialPosition.y());
         painter.drawLine(initialPosition.x(), initialPosition.y()+2, initialPosition.x(), initialPosition.y()+5);
         painter.drawLine(initialPosition.x(), initialPosition.y()-2, initialPosition.x(), initialPosition.y()-5);
         painter.drawLine(initialPosition.x()-2, initialPosition.y(), initialPosition.x()-5, initialPosition.y());
-        //painter.drawEllipse(QRect(initialPosition.x()-3, initialPosition.y()-3, 4, 4));
+        
         painter.setBrush(Qt::NoBrush);
-        //painter.drawLine(initialPosition, currentPosition);
-        painter.drawText(currentPosition, selectedCoordinateString);
+        
+        painter.drawText(width() - currentFontMetrics.width(selectedCoordinateString) - 3, height() - 5, selectedCoordinateString);
     }
     
     painter.setPen(palette().dark().color());
@@ -234,7 +236,7 @@ void RenderArea::paintEvent(QPaintEvent *)
     painter.drawRect(QRect(0, 0, width() - 1, height() - 1));
 }
 
-void RenderArea::keyPressEvent(QKeyEvent * event)
+void RenderArea::keyPressEvent(QKeyEvent *event)
 {
     if (graphTool == ZOOM && event->key() & Qt::Key_Alt && ignoreZoomBox(initialPosition, currentPosition))
     {
@@ -242,7 +244,7 @@ void RenderArea::keyPressEvent(QKeyEvent * event)
     }
 }
 
-void RenderArea::keyReleaseEvent(QKeyEvent * event)
+void RenderArea::keyReleaseEvent(QKeyEvent *event)
 {
     if (graphTool == ZOOM && event->key() & Qt::Key_Alt && ignoreZoomBox(initialPosition, currentPosition))
     {
@@ -250,37 +252,37 @@ void RenderArea::keyReleaseEvent(QKeyEvent * event)
     }
 }
 
-void RenderArea::mousePressEvent(QMouseEvent * event)
+void RenderArea::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
     {
         initialPosition = event->pos();
-		leftDrag = true;
+        leftDrag = true;
 
-		switch(graphTool)
-		{
+        switch(graphTool)
+        {
             case MOVE:
                 setCursor(Qt::ClosedHandCursor);
                 break;
             case SELECTION:
-				initialPosition = event->pos();
+                initialPosition = event->pos();
                 break;
             case ZOOM:
                 currentPosition = initialPosition = event->pos();
                 break;
-		}
+        }
     }
 }
 
-void RenderArea::mouseReleaseEvent(QMouseEvent * event)
+void RenderArea::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton && leftDrag)
     {
         QPoint newPosition = event->pos();
-		leftDrag = false;
+        leftDrag = false;
 
-		switch (graphTool)
-		{
+        switch (graphTool)
+        {
             case MOVE:
                 move(newPosition);
                 setCursor(Qt::OpenHandCursor);
@@ -321,7 +323,32 @@ void RenderArea::mouseReleaseEvent(QMouseEvent * event)
                 }
                 else
                 {
-                    plotter.setBounds(initialPosition.x(), currentPosition.x(), initialPosition.y(), currentPosition.y());
+                    int startX, endX;
+                    int startY, endY;
+                    
+                    if (initialPosition.x() < currentPosition.x())
+                    {
+                        startX = initialPosition.x();
+                        endX = currentPosition.x();
+                    }
+                    else
+                    {
+                        startX = currentPosition.x();
+                        endX = initialPosition.x();
+                    }
+                    
+                    if (initialPosition.y() < currentPosition.y())
+                    {
+                        startY = initialPosition.y();
+                        endY = currentPosition.y();
+                    }
+                    else
+                    {
+                        startY = currentPosition.y();
+                        endY = initialPosition.y();
+                    }
+                    
+                    plotter.setBounds(startX, endX, startY, endY);
                     
                     // Reset cursor
                     if (event->modifiers() & Qt::AltModifier)
@@ -335,13 +362,13 @@ void RenderArea::mouseReleaseEvent(QMouseEvent * event)
                 
                 rebuildFunctionCache();
                 break;
-		}
+        }
 
         update();
     }
 }
 
-void RenderArea::mouseMoveEvent(QMouseEvent * event)
+void RenderArea::mouseMoveEvent(QMouseEvent *event)
 {
     switch(graphTool)
     {
@@ -378,7 +405,7 @@ void RenderArea::mouseMoveEvent(QMouseEvent * event)
     }
 }
 
-void RenderArea::wheelEvent(QWheelEvent * event)
+void RenderArea::wheelEvent(QWheelEvent *event)
 {
     QPoint numPixels = event->pixelDelta();
     
@@ -393,7 +420,7 @@ void RenderArea::wheelEvent(QWheelEvent * event)
     }
 }
 
-void RenderArea::resizeEvent(QResizeEvent * event)
+void RenderArea::resizeEvent(QResizeEvent *event)
 {
     QSize newSize = event->size();
     
@@ -453,5 +480,5 @@ void RenderArea::rebuildFunctionCache()
 
 bool RenderArea::ignoreZoomBox(const QPoint &begin, const QPoint &end)
 {
-    return std::abs(end.x() - begin.x()) + std::abs(end.y() - begin.y()) <= IGNORE_ZOOM_BOX; // Manhattan length as in QPoint::manhattanLength()
+    return (end - begin).manhattanLength() <= IGNORE_ZOOM_BOX;
 }

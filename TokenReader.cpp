@@ -8,13 +8,11 @@
 
 #include "TokenReader.h"
 
-using namespace std;
-
 TokenReader::TokenReader(std::string expression)
 : expressionStream(expression)
 {}
 
-TokenType TokenReader::read(string &result)
+TokenType TokenReader::read(std::string &result)
 {
     TokenType tokenType = END;
     
@@ -24,60 +22,60 @@ TokenType TokenReader::read(string &result)
         c = expressionStream.get();
     }
     
-    if (c != char_traits<char>::eof())
+    if (c != std::char_traits<char>::eof())
     {
         result = c;
-	    
-	    switch (c)
-	    {
-	        case '0':
-	        case '1':
-	        case '2':
-	        case '3':
-	        case '4':
-	        case '5':
-	        case '6':
-	        case '7':
-	        case '8':
-	        case '9':
-	        case '.':
-	            while (expressionStream.get(c) && (isdigit(c) || c == '.'))
-	                result += c;
-	            
-	            expressionStream.putback(c);
-	            
-	            tokenType = NUMBER;
-	            break;
-	        case '+':
-	        case '-':
-            case '~':
-	        case '*':
-	        case '/':
-	        case '^':
-	            tokenType = OPERATOR;
-	            break;
-	        case '(':
-	            tokenType = PARENTHESIS_START;
-	            break;
-	        case ')':
-	            tokenType = PARENTHESIS_END;
-	            break;
-	        default:
-	            if (isalpha(c))
-	            {
-	                while(expressionStream.get(c) && isalnum(c))
-	                    result += c;
-	                
-	                expressionStream.putback(c);
-	                
-	                tokenType = NAME;
-	            }
-	            else
-	            {
-	                tokenType = BAD_TOKEN;
-	            }
+        
+        switch (c)
+        {
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+            case '.':
+                while (expressionStream.get(c) && (isdigit(c) || c == '.'))
+                    result += c;
+                
+                expressionStream.putback(c);
+                
+                tokenType = NUMBER;
                 break;
-	    }
+            case '+':
+            case '-':
+            case '~':
+            case '*':
+            case '/':
+            case '^':
+                tokenType = OPERATOR;
+                break;
+            case '(':
+                tokenType = PARENTHESIS_START;
+                break;
+            case ')':
+                tokenType = PARENTHESIS_END;
+                break;
+            default:
+                if (isalpha(c))
+                {
+                    while(expressionStream.get(c) && isalnum(c))
+                        result += c;
+                    
+                    expressionStream.putback(c);
+                    
+                    tokenType = NAME;
+                }
+                else
+                {
+                    tokenType = BAD_TOKEN;
+                }
+                break;
+        }
         
     }
     
@@ -89,7 +87,7 @@ size_t TokenReader::getCurrentPosition()
     return expressionStream.tellg();
 }
 
-bool TokenReader::isOperator(const string &token)
+bool TokenReader::isOperator(const std::string &token)
 {
     bool isOpr = false;
     
@@ -115,12 +113,12 @@ bool TokenReader::isUnary(const std::string &token)
     return token == "~";
 }
 
-bool TokenReader::isLeftAssociative(const string &token)
+bool TokenReader::isLeftAssociative(const std::string &token)
 {
     return token != "^";
 }
 
-int TokenReader::operatorPrecedence(const string &token)
+int TokenReader::operatorPrecedence(const std::string &token)
 {
     int precedence = -1;
     
@@ -148,7 +146,7 @@ int TokenReader::operatorPrecedence(const string &token)
     return precedence;
 }
 
-bool TokenReader::isName(const string &token)
+bool TokenReader::isName(const std::string &token)
 {
     return !token.empty() && isalpha(token[0]);
 }

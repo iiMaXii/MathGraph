@@ -24,6 +24,7 @@ enum TokenType {
 class TokenReader
 {
     std::istringstream expressionStream;
+    
 public:
     TokenReader(std::string expression);
     

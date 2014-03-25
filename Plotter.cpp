@@ -9,43 +9,27 @@
 #include "Plotter.h"
 #include <cmath>
 
-InvalidSelection::InvalidSelection(const std::string& _what_arg)
-: std::logic_error(_what_arg)
+InvalidSelection::InvalidSelection(const std::string &_what_arg)
+    : std::logic_error(_what_arg)
 {}
 
-int Plotter::xPtToPx(real x) const
-{
-	return static_cast<int>(pixelWidth * (x - xMin) / (xMax - xMin));
-}
-
-int Plotter::yPtToPx(real y) const
-{
-	return static_cast<int>(pixelHeight * (1 - (y - yMin) / (yMax - yMin)));
-}
-
-real Plotter::xPxToPt(int x) const
-{
-	return x * (xMax - xMin) / pixelWidth + xMin;
-}
-
-real Plotter::yPxToPt(int y) const
-{
-    return (pixelHeight - y) * (yMax - yMin) / pixelHeight + yMin;
-}
 
 Plotter::Plotter(int _pixelWidth, int _pixelHeight, real _xMin, real _xMax, real _yMin, real _yMax, double _samplingRate, int _pixelMarkerGap)
-: pixelWidth(_pixelWidth), pixelHeight(_pixelHeight), xMin(_xMin), xMax(_xMax), yMin(_yMin), yMax(_yMax), samplingRate(_samplingRate), pixelMarkerGap(_pixelMarkerGap)
+    : pixelWidth(_pixelWidth),
+      pixelHeight(_pixelHeight),
+      xMin(_xMin),
+      xMax(_xMax),
+      yMin(_yMin),
+      yMax(_yMax),
+      samplingRate(_samplingRate),
+      pixelMarkerGap(_pixelMarkerGap)
 {
     Expression::addVariable("x", 0);
 }
 
-Plotter::Plotter(int _pixelWidth, int _pixelHeight)
-: Plotter(_pixelWidth, _pixelHeight, -10, 10, -10, 10)
-{}
+Plotter::Plotter(int _pixelWidth, int _pixelHeight) : Plotter(_pixelWidth, _pixelHeight, -10, 10, -10, 10) {}
 
-Plotter::Plotter()
-: Plotter(0, 0)
-{}
+Plotter::Plotter() : Plotter(0, 0) {}
 
 void Plotter::addExpression(const std::string &expression)
 {
@@ -55,7 +39,7 @@ void Plotter::addExpression(const std::string &expression)
 
 void Plotter::addExpression(const Expression &expression)
 {
-	expressions.emplace_back(expression);
+    expressions.emplace_back(expression);
     expressionIsHidden.push_back(false);
 }
 
@@ -94,14 +78,14 @@ void Plotter::resize(int _pixelWidth, int _pixelHeight)
 
 void Plotter::move(int diffX, int diffY)
 {
-	real xMoveFactor = pixelWidth / (xMax - xMin);
-	real yMoveFactor = pixelHeight / (yMax - yMin);
+    real xMoveFactor = pixelWidth / (xMax - xMin);
+    real yMoveFactor = pixelHeight / (yMax - yMin);
     
-	xMin += diffX / xMoveFactor;
-	xMax += diffX / xMoveFactor;
+    xMin += diffX / xMoveFactor;
+    xMax += diffX / xMoveFactor;
     
-	yMin -= diffY / yMoveFactor;
-	yMax -= diffY / yMoveFactor;
+    yMin -= diffY / yMoveFactor;
+    yMax -= diffY / yMoveFactor;
 }
 
 void Plotter::zoom(int steps, int x, int y)
@@ -144,7 +128,7 @@ Point<int> Plotter::getOrigo() const
     real diffX = xMax - xMin;
     real diffY = yMax - yMin;
     
-	return Point<int>(static_cast<int>(-xMin * pixelWidth / diffX), static_cast<int>(yMax * pixelHeight / diffY));
+    return Point<int>(static_cast<int>(-xMin * pixelWidth / diffX), static_cast<int>(yMax * pixelHeight / diffY));
 }
 
 std::vector<std::pair<int, std::string>> Plotter::getXMarkers() const
@@ -228,7 +212,7 @@ std::vector<Point<int>> Plotter::getPlotSamples(Plotter::size_type expressionInd
         Expression::setVariable("x", x);
         y = currentExpression.evaluate();
         
-		result.emplace_back(static_cast<int>(pixelWidth * (x - xMin) / diffX), static_cast<int>(pixelHeight * (1 - (y - yMin) / diffY)));
+        result.emplace_back(static_cast<int>(pixelWidth * (x - xMin) / diffX), static_cast<int>(pixelHeight * (1 - (y - yMin) / diffY)));
     }
     
     return result;
@@ -261,10 +245,30 @@ std::pair<Point<int>, Point<std::string>> Plotter::getPointFromSelected(int x) c
 
 Plotter::const_iterator Plotter::cbegin() const
 {
-	return expressions.cbegin();
+    return expressions.cbegin();
 }
 
 Plotter::const_iterator Plotter::cend() const
 {
-	return expressions.cend();
+    return expressions.cend();
+}
+
+int Plotter::xPtToPx(real x) const
+{
+    return static_cast<int>(pixelWidth * (x - xMin) / (xMax - xMin));
+}
+
+int Plotter::yPtToPx(real y) const
+{
+    return static_cast<int>(pixelHeight * (1 - (y - yMin) / (yMax - yMin)));
+}
+
+real Plotter::xPxToPt(int x) const
+{
+    return x * (xMax - xMin) / pixelWidth + xMin;
+}
+
+real Plotter::yPxToPt(int y) const
+{
+    return (pixelHeight - y) * (yMax - yMin) / pixelHeight + yMin;
 }

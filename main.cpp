@@ -2,11 +2,12 @@
 //  main.cpp
 //  MathGraph
 //
-//  Copyright Max Ekström. Licenced under GPL v3 (see README).
+//  Copyright Max Ekstršm. Licenced under GPL v3 (see README).
 //
 //
 
 #include "MainWindow.h"
+
 #include <QApplication>
 
 /**
@@ -15,7 +16,7 @@
  *  - Implicit multiplication not implemented (eg. 5(1+2) or 5a)
  */
 
-int main(int argc, char * argv[])
+int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MainWindow w;

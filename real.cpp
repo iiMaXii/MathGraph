@@ -11,7 +11,8 @@
 
 bool real_functions::parseReal(const std::string &str, long double &real)
 {
-    try {
+    try
+    {
         real = stold(str);
         return true;
     }
