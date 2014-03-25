@@ -2,7 +2,7 @@
 //  RenderArea.cpp
 //  MathGraph
 //
-//  Copyright Max Ekström. Licenced under GPL v3 (see README).
+//  Copyright Max Ekström. Licensed under GPL v3 (see README).
 //
 //
 
@@ -10,9 +10,6 @@
 #include "real.h"
 
 #include <QIcon>
-
-#include <iostream>
-#include <cmath>
 
 RenderArea::RenderArea(QWidget *_parent)
     : QWidget(_parent),
@@ -22,12 +19,10 @@ RenderArea::RenderArea(QWidget *_parent)
       leftDrag(false),
       selectedCoordinateString(),
       plotter(),
+      functionCache(),
+      selectedFunction(npos),
       invalidSelectionErrorDialog(_parent)
 {
-    Expression::addFunction("sin", real_functions::sin);
-    Expression::addFunction("cos", real_functions::cos);
-    Expression::addFunction("tan", real_functions::tan);
-    
     setCursor(Qt::OpenHandCursor);
     setBackgroundRole(QPalette::Base);
     setAutoFillBackground(true);
@@ -51,7 +46,7 @@ QSize RenderArea::sizeHint() const
     return QSize(400, 300);
 }
 
-Plotter::size_type RenderArea::addExpression(const Expression &expr)
+Plotter::size_type RenderArea::addFunction(const Expression &expr)
 {
     plotter.addExpression(expr);
     
@@ -61,11 +56,27 @@ Plotter::size_type RenderArea::addExpression(const Expression &expr)
     return plotter.numExpressions() - 1;
 }
 
+Plotter::size_type RenderArea::removeSelectedFunction()
+{
+    Plotter::size_type removedIndex = selectedFunction;
+    
+    if (selectedFunction != npos)
+    {
+        plotter.removeExpression(selectedFunction);
+        
+        selectedFunction = npos;
+        
+        rebuildFunctionCache();
+        update();
+    }
+    
+    return removedIndex;
+}
+
 void RenderArea::centerOrigo()
 {
+    removeCurveSelection();
     plotter.centerOrigo();
-    
-    selectedCoordinateString.clear();
     
     rebuildFunctionCache();
     update();
@@ -79,11 +90,11 @@ void RenderArea::setTool(GraphTool _graphTool)
     {
         case MOVE:
             setCursor(Qt::OpenHandCursor);
-            selectedCoordinateString.clear();
+            removeCurveSelection();
             break;
         case SELECTION:
             setCursor(Qt::CrossCursor);
-            selectedCoordinateString.clear();
+            removeCurveSelection();
             break;
         case ZOOM:
             setCursor(zoomPlusCursor);
@@ -94,11 +105,7 @@ void RenderArea::setTool(GraphTool _graphTool)
 void RenderArea::clearSelection()
 {
     plotter.clearSelection();
-    
-    for (auto it = functionCache.begin(); it != functionCache.cend(); ++it)
-    {
-        it->first = false;
-    }
+    selectedFunction = npos;
     
     update();
 }
@@ -106,8 +113,7 @@ void RenderArea::clearSelection()
 void RenderArea::select(Plotter::size_type expressionIndex)
 {
     plotter.select(expressionIndex);
-    
-    functionCache[expressionIndex].first = true;
+    selectedFunction = expressionIndex;
     
     update();
 }
@@ -125,10 +131,26 @@ void RenderArea::setEnabled(Plotter::size_type expressionIndex, bool enabled)
         }
         else
         {
-            functionCache[expressionIndex].second = QPainterPath();
+            functionCache[expressionIndex] = QPainterPath();
         }
         
         update();
+    }
+}
+
+void RenderArea::keyPressEvent(QKeyEvent *event)
+{
+    if (graphTool == ZOOM && event->key() & Qt::Key_Alt && ignoreZoomBox(initialPosition, currentPosition))
+    {
+        setCursor(zoomMinusCursor);
+    }
+}
+
+void RenderArea::keyReleaseEvent(QKeyEvent *event)
+{
+    if (graphTool == ZOOM && event->key() & Qt::Key_Alt && ignoreZoomBox(initialPosition, currentPosition))
+    {
+        setCursor(zoomPlusCursor);
     }
 }
 
@@ -187,9 +209,9 @@ void RenderArea::paintEvent(QPaintEvent *)
     // Draw functions
     for (size_type i = 0; i != functionCache.size(); ++i)
     {
-        if (!functionCache[i].second.isEmpty())
+        if (!functionCache[i].isEmpty())
         {
-            if (functionCache[i].first)
+            if (i == selectedFunction)
             {
                 boldPen.setColor(FUNCTION_COLORS[i % FUNCTION_COLORS.size()]);
                 painter.setPen(boldPen);
@@ -200,7 +222,7 @@ void RenderArea::paintEvent(QPaintEvent *)
                 painter.setPen(normalPen);
             }
             
-            painter.drawPath(functionCache[i].second);
+            painter.drawPath(functionCache[i]);
             
             painter.setPen(normalPen);
         }
@@ -234,22 +256,6 @@ void RenderArea::paintEvent(QPaintEvent *)
     painter.setPen(palette().dark().color());
     painter.setBrush(Qt::NoBrush);
     painter.drawRect(QRect(0, 0, width() - 1, height() - 1));
-}
-
-void RenderArea::keyPressEvent(QKeyEvent *event)
-{
-    if (graphTool == ZOOM && event->key() & Qt::Key_Alt && ignoreZoomBox(initialPosition, currentPosition))
-    {
-        setCursor(zoomMinusCursor);
-    }
-}
-
-void RenderArea::keyReleaseEvent(QKeyEvent *event)
-{
-    if (graphTool == ZOOM && event->key() & Qt::Key_Alt && ignoreZoomBox(initialPosition, currentPosition))
-    {
-        setCursor(zoomPlusCursor);
-    }
 }
 
 void RenderArea::mousePressEvent(QMouseEvent *event)
@@ -288,26 +294,7 @@ void RenderArea::mouseReleaseEvent(QMouseEvent *event)
                 setCursor(Qt::OpenHandCursor);
                 break;
             case SELECTION:
-            {
-                try
-                {
-                    std::pair<Point<int>, Point<std::string>> selectedPoint = plotter.getPointFromSelected(event->x());
-                    selectedCoordinateString = "(";
-                    selectedCoordinateString += selectedPoint.second.getX().c_str();
-                    selectedCoordinateString += ", ";
-                    selectedCoordinateString += selectedPoint.second.getY().c_str();
-                    selectedCoordinateString += ")";
-                    
-                    initialPosition = QPoint(selectedPoint.first.getX(), selectedPoint.first.getY());
-                    currentPosition = event->pos();
-                }
-                catch (InvalidSelection &)
-                {
-                    selectedCoordinateString.clear();
-                    
-                    invalidSelectionErrorDialog.exec();
-                }
-            }
+                doCurveSelection(event->pos());
                 break;
             case ZOOM:
                 if (ignoreZoomBox(initialPosition, currentPosition))
@@ -380,7 +367,7 @@ void RenderArea::mouseMoveEvent(QMouseEvent *event)
             }
             break;
         case SELECTION:
-            // maybe
+            doCurveSelection(event->pos());
             break;
         case ZOOM:
             if (event->buttons() & Qt::LeftButton && leftDrag)
@@ -412,8 +399,7 @@ void RenderArea::wheelEvent(QWheelEvent *event)
     if(!numPixels.isNull())
     {
         plotter.zoom(numPixels.y(), event->x(), event->y());
-        
-        selectedCoordinateString.clear();
+        removeCurveSelection();
         
         rebuildFunctionCache();
         update();
@@ -446,15 +432,44 @@ void RenderArea::move(const QPoint &newPosition)
     }
 }
 
+void RenderArea::doCurveSelection(const QPoint &pos)
+{
+    try
+    {
+        std::pair<Point<int>, Point<std::string>> selectedPoint = plotter.getPointFromSelected(pos.x());
+        selectedCoordinateString = "(";
+        selectedCoordinateString += selectedPoint.second.getX().c_str();
+        selectedCoordinateString += ", ";
+        selectedCoordinateString += selectedPoint.second.getY().c_str();
+        selectedCoordinateString += ")";
+        
+        initialPosition = QPoint(selectedPoint.first.getX(), selectedPoint.first.getY());
+        currentPosition = pos;
+        
+        update();
+    }
+    catch (const InvalidSelection &)
+    {
+        removeCurveSelection();
+        
+        invalidSelectionErrorDialog.exec();
+    }
+}
+
+void RenderArea::removeCurveSelection()
+{
+    selectedCoordinateString.clear();
+}
+
 void RenderArea::rebuildFunctionCache()
 {
     functionCache.clear();
     
-    for (Plotter::size_type i = 0; i < plotter.numExpressions(); ++i)
+    for (Plotter::size_type i = 0; i != plotter.numExpressions(); ++i)
     {
         if (plotter.isHidden(i))
         {
-            functionCache.emplace_back(false, QPainterPath());
+            functionCache.emplace_back();
         }
         else
         {
@@ -473,7 +488,7 @@ void RenderArea::rebuildFunctionCache()
                 }
             }
             
-            functionCache.emplace_back(plotter.isSelected(i), functionPath);
+            functionCache.emplace_back(functionPath);
         }
     }
 }

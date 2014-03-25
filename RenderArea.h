@@ -2,7 +2,7 @@
 //  RenderArea.h
 //  MathGraph
 //
-//  Copyright Max Ekström. Licenced under GPL v3 (see README).
+//  Copyright Max Ekström. Licensed under GPL v3 (see README).
 //
 //
 
@@ -39,7 +39,8 @@ public:
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
     
-    Plotter::size_type addExpression(const Expression &expr);
+    Plotter::size_type addFunction(const Expression &expr);
+    Plotter::size_type removeSelectedFunction();
     void centerOrigo();
     void setTool(GraphTool _graphTool);
     
@@ -56,16 +57,19 @@ protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
-    void wheelEvent (QWheelEvent *event);
-    
+    void wheelEvent(QWheelEvent *event);
     void resizeEvent(QResizeEvent *event);
     
 private:
     void move(const QPoint &newPosition);
+    void doCurveSelection(const QPoint &pos);
+    void removeCurveSelection();
     void rebuildFunctionCache();
-    
     const int IGNORE_ZOOM_BOX = 8; // No box zoom if area is less or equal
     bool ignoreZoomBox(const QPoint &begin, const QPoint &end);
+    
+    typedef std::vector<QPainterPath>::size_type size_type;
+    size_type npos = -1;
     
     QCursor zoomPlusCursor;
     QCursor zoomMinusCursor;
@@ -78,8 +82,8 @@ private:
     QString selectedCoordinateString;
     
     Plotter plotter;
-    std::vector<std::pair<bool, QPainterPath>> functionCache;
-    typedef std::vector<std::pair<bool, QPainterPath>>::size_type size_type;
+    std::vector<QPainterPath> functionCache;
+    size_type selectedFunction;
     
     QMessageBox invalidSelectionErrorDialog;
 };

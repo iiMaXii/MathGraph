@@ -1,13 +1,17 @@
-#-------------------------------------------------
 #
-# Project created by QtCreator 2014-03-01T17:38:04
+#   MathGraph.pro
+#   MathGraph
 #
-#-------------------------------------------------
+#   Copyright Max Ekström. Licensed under GPL v3 (see README).
+#
+#
 
 CONFIG += c++11
 
 QT += core gui
 QT += widgets
+QT += webkit
+QT += webkitwidgets
 
 TARGET = MathGraph
 TEMPLATE = app
@@ -21,14 +25,15 @@ SOURCES +=  Expression.cpp \
             TokenReader.cpp \
             main.cpp \
             real.cpp \
-            QListWidgetFunctionItem.cpp
+            QListWidgetFunctionItem.cpp \
+            HelpWindow.cpp
 
-HEADERS  += DEBUG.h \
-            Expression.h \
+HEADERS  += Expression.h \
             MainWindow.h \
             Plotter.h \
             Point.h \
             RenderArea.h \
             TokenReader.h \
             real.h \
-            QListWidgetFunctionItem.h
+            QListWidgetFunctionItem.h \
+            HelpWindow.h

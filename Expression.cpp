@@ -2,7 +2,7 @@
 //  Expression.cpp
 //  MathGraph
 //
-//  Copyright Max Ekström. Licenced under GPL v3 (see README).
+//  Copyright Max Ekström. Licensed under GPL v3 (see README).
 //
 //
 
@@ -44,7 +44,19 @@ std::map<std::string, const real> Expression::constants = {
 
 std::map<std::string, real> Expression::variables;
 
-std::map<std::string, real (*)(real)> Expression::functions;
+std::map<std::string, real (*)(real)> Expression::functions = {
+    {"sin", real_functions::sin},
+    {"cos", real_functions::cos},
+    {"tan", real_functions::tan},
+    {"arcsin", real_functions::arcsin},
+    {"arccos", real_functions::arccos},
+    {"arctan", real_functions::arctan},
+    {"sqrt", real_functions::sqrt},
+    {"floor", real_functions::floor},
+    {"ceil", real_functions::ceil},
+    {"ln", real_functions::ln},
+    {"log", real_functions::log10}
+};
 
 bool Expression::addVariable(std::string name, real initialValue)
 {

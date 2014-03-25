@@ -2,7 +2,7 @@
 //  Expression.h
 //  MathGraph
 //
-//  Copyright Max Ekström. Licenced under GPL v3 (see README).
+//  Copyright Max Ekström. Licensed under GPL v3 (see README).
 //
 //
 

@@ -2,21 +2,20 @@
 //  real.cpp
 //  MathGraph
 //
-//  Copyright Max Ekström. Licenced under GPL v3 (see README).
+//  Copyright Max Ekström. Licensed under GPL v3 (see README).
 //
 //
 
 #include "real.h"
-#include <cmath>
 
-bool real_functions::parseReal(const std::string &str, long double &real)
+bool real_functions::parseReal(const std::string &str, long double &r)
 {
     try
     {
-        real = stold(str);
+        r = stold(str);
         return true;
     }
-    catch (std::exception &)
+    catch (const std::exception &)
     {
         return false;
     }

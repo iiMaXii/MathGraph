@@ -2,7 +2,7 @@
 //  Plotter.h
 //  MathGraph
 //
-//  Copyright Max Ekström. Licenced under GPL v3 (see README).
+//  Copyright Max Ekström. Licensed under GPL v3 (see README).
 //
 //
 
@@ -27,7 +27,7 @@ class Plotter
 public:
     typedef std::vector<Expression>::size_type size_type;
     typedef std::vector<Expression>::const_iterator const_iterator;
-    const size_type npos = -1;
+    static const size_type npos = -1;
     
     Plotter(int _pixelWidth, int _pixelHeight, real _xMin, real _xMax, real _yMin, real _yMax, double _samplingRate = 2, int _pixelMarkerGap = 100);
     Plotter(int _pixelWidth, int _pixelHeight);
@@ -35,6 +35,7 @@ public:
     
     void addExpression(const std::string &expression);
     void addExpression(const Expression &expression);
+    void removeExpression(size_type expressionIndex);
     
     void centerOrigo();
     void setBounds(real _xMin, real _xMax, real _yMin, real _yMax);
@@ -79,10 +80,14 @@ private:
     size_type selectedExpression = npos;
     
     int xPtToPx(real x) const;
+    int xPtToPx(real x, real pixelsPerPoint) const;
     int yPtToPx(real y) const;
+    int yPtToPx(real y, real pixelsPerPoint, real yDiff) const;
     
     real xPxToPt(int x) const;
+    real xPxToPt(int x, real pointsPerPixel) const;
     real yPxToPt(int y) const;
+    real yPxToPt(int y, real pointsPerPixel) const;
 };
 
 #endif /* defined(__MathGraph__Plotter__) */

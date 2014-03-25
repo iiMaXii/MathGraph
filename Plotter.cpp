@@ -2,7 +2,7 @@
 //  Plotter.cpp
 //  MathGraph
 //
-//  Copyright Max Ekström. Licenced under GPL v3 (see README).
+//  Copyright Max Ekström. Licensed under GPL v3 (see README).
 //
 //
 
@@ -41,6 +41,13 @@ void Plotter::addExpression(const Expression &expression)
 {
     expressions.emplace_back(expression);
     expressionIsHidden.push_back(false);
+}
+
+void Plotter::removeExpression(size_type expressionIndex)
+{
+    expressions.erase(expressions.begin() + expressionIndex);
+    
+    if (selectedExpression == expressionIndex) selectedExpression = npos;
 }
 
 void Plotter::centerOrigo()
@@ -125,10 +132,7 @@ void Plotter::zoom(int steps, int x, int y)
 
 Point<int> Plotter::getOrigo() const
 {
-    real diffX = xMax - xMin;
-    real diffY = yMax - yMin;
-    
-    return Point<int>(static_cast<int>(-xMin * pixelWidth / diffX), static_cast<int>(yMax * pixelHeight / diffY));
+    return Point<int>(xPtToPx(0), yPtToPx(0));
 }
 
 std::vector<std::pair<int, std::string>> Plotter::getXMarkers() const
@@ -140,10 +144,10 @@ std::vector<std::pair<int, std::string>> Plotter::getXMarkers() const
     
     real start = std::ceil(xMin / step) * step;
     
-    real pixelRatio = pixelWidth / (xMax - xMin);
+    real pixelsPerPoint = pixelWidth / (xMax - xMin);
     for (real x = start; x <= xMax; x += step)
     {
-        if (x != 0) markers.emplace_back(static_cast<int>((x - xMin) * pixelRatio), real_functions::toString(x));
+        if (x != 0) markers.emplace_back(xPtToPx(x, pixelsPerPoint), real_functions::toString(x));
     }
     
     return markers;
@@ -159,9 +163,10 @@ std::vector<std::pair<int, std::string>> Plotter::getYMarkers() const
     real start = std::ceil(yMin / step) * step;
     
     real yDiff = yMax - yMin;
+    real pixelsPerPoint = pixelHeight / yDiff;
     for (real y = start; y <= yMax; y += step)
     {
-        if (y != 0) markers.emplace_back(static_cast<int>(pixelHeight * (1 - (y - yMin) / yDiff)), real_functions::toString(y));
+        if (y != 0) markers.emplace_back(yPtToPx(y, pixelsPerPoint, yDiff), real_functions::toString(y));
     }
     
     return markers;
@@ -203,16 +208,19 @@ std::vector<Point<int>> Plotter::getPlotSamples(Plotter::size_type expressionInd
     
     const Expression &currentExpression = expressions[expressionIndex];
     
-    real diffX = xMax - xMin;
-    real diffY = yMax - yMin;
-    real step = diffX * samplingRate / pixelWidth;
+    real xDiff = xMax - xMin;
+    real yDiff = yMax - yMin;
+    real xPixelsPerPoint = pixelWidth / xDiff;
+    real yPixelsPerPoint = pixelHeight / yDiff;
+    
+    real step = xDiff * samplingRate / pixelWidth;
     real y;
     for (real x = xMin; x < xMax + step; x += step)
     {
         Expression::setVariable("x", x);
         y = currentExpression.evaluate();
         
-        result.emplace_back(static_cast<int>(pixelWidth * (x - xMin) / diffX), static_cast<int>(pixelHeight * (1 - (y - yMin) / diffY)));
+        result.emplace_back(xPtToPx(x, xPixelsPerPoint), yPtToPx(y, yPixelsPerPoint, yDiff));
     }
     
     return result;
@@ -258,9 +266,19 @@ int Plotter::xPtToPx(real x) const
     return static_cast<int>(pixelWidth * (x - xMin) / (xMax - xMin));
 }
 
+int Plotter::xPtToPx(real x, real pixelsPerPoint) const
+{
+    return static_cast<int>(pixelsPerPoint * (x - xMin));
+}
+
 int Plotter::yPtToPx(real y) const
 {
     return static_cast<int>(pixelHeight * (1 - (y - yMin) / (yMax - yMin)));
+}
+
+int Plotter::yPtToPx(real y, real pixelsPerPoint, real yDiff) const
+{
+    return static_cast<int>(pixelsPerPoint * (yDiff - (y - yMin)));
 }
 
 real Plotter::xPxToPt(int x) const
@@ -268,7 +286,17 @@ real Plotter::xPxToPt(int x) const
     return x * (xMax - xMin) / pixelWidth + xMin;
 }
 
+real Plotter::xPxToPt(int x, real pointsPerPixel) const
+{
+    return x * pointsPerPixel + xMin;
+}
+
 real Plotter::yPxToPt(int y) const
 {
     return (pixelHeight - y) * (yMax - yMin) / pixelHeight + yMin;
+}
+
+real Plotter::yPxToPt(int y, real pointsPerPixel) const
+{
+    return (pixelHeight - y) * pointsPerPixel + yMin;
 }

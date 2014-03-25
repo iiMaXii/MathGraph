@@ -1,0 +1,241 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" 
+"http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+	<head>
+		<title>MathGraph Helper</title>
+		
+		<style type="text/css">
+		body
+		{
+			font-face: Tahoma, Courier, Verdana;
+		}
+		
+		#container
+		{
+			width: 100%;
+		}
+		
+		#menu
+		{
+			width: 200px;
+			position: fixed;
+			left: 7px;
+			top: 7px;
+		}
+		
+		#content
+		{
+			margin-left: 200px;
+			overflow:hidden
+		}
+		
+		.item
+		{
+			font-weight: bold;
+		}
+		
+		.subItem
+		{
+			margin-left: 7px;
+		}
+		
+		a
+		{
+			color: #17652b;
+			text-decoration: none;
+		}
+		
+		a:hover
+		{
+			color: #6cbc4d;
+			text-decoration: underline;
+		}
+		
+		h2, h3
+		{
+			color: #17652b;
+		}
+		
+		table
+		{
+			border: 0;
+			margin: 0;
+			border-spacing: 0;
+		}
+		
+		table td, table th
+		{
+			border-bottom: 1px solid white;
+			padding: 5px;
+		}
+		
+		.seperator
+		{
+			border-color: black;
+		}
+		
+		table th
+		{
+			background: #b7b7b7;
+		}
+		
+		table td
+		{
+			font-size: 0.9em;
+		}
+		
+		table tr
+		{
+			background: #e8e8e8;
+			padding: 5px;
+			color: black;
+		}
+		
+		table tr:hover
+		{
+			background: #7dab93;
+		}
+		
+		.expression
+		{
+			font-family: monospace;
+		}
+		
+		</style>
+	</head>
+
+	<body>
+		<div id="container">
+			<div id="menu">
+				<h1>MethGraph</h1>
+				<a class="item" href="#plotting_functions">1 Plotting functions</a><br>
+				<a class="subItem" href="#operators">1.1 Operators</a><br>
+				<a class="subItem" href="#constants">1.2 Constants</a><br>
+				<a class="subItem" href="#functions">1.3 Functions</a><br>
+				<a class="item" href="#tools">2 Tools</a><br>
+				<a class="subItem" href="#move_tool">2.1 Move tool</a><br>
+				<a class="subItem" href="#zoom_tool">2.2 Zoom tool</a><br>
+				<a class="subItem" href="#selection_tool">2.3 Selection tool</a>
+			</div>
+			<div id="content">
+				<h2 id="plotting_functions">1 Plotting functions</h2>
+				<p>To plot a function you simply type the function in the field at the bottom of the programs window and you can either press the button <strong>Add</strong> or the key <strong>ENTER</strong>.</p>
+				<p>To delete a function, select it in the function list and press the <strong>DELETE</strong> key.</p>
+				<h3 id="operators">1.1 Operators</h3>
+				<p>This is a table of the available operators. The operator with the highest precedence will be evaluated first.</p>
+				<table>
+					<tr>
+						<th>Precedence</th>
+						<th>Operator</th>
+						<th>Description</th>
+						<th>Example</th>
+					</tr>
+					<tr>
+						<td>5</td>
+						<td>^</td>
+						<td>Power of</td>
+						<td class="expression">x^2</td>
+					</tr>
+					<tr>
+						<td>4</td>
+						<td>+ -</td>
+						<td>Unary plus and minus</td>
+						<td class="expression">-x</td>
+					</tr>
+					<tr>
+						<td>3</td>
+						<td>* /</td>
+						<td>Multiplication and division</td>
+						<td class="expression">10 * x</td>
+					</tr>
+					<tr>
+						<td>2</td>
+						<td>+ -</td>
+						<td>Plus and minus</td>
+						<td class="expression">10 + x</td>
+					</tr>
+				</table>
+				<h3 id="constants">1.2 Constants</h3>
+				<p>This is a table of the available constants. The precision may vary depending on your system.</p>
+				<table>
+					<tr>
+						<th>Constant</th>
+						<th>Value</th>
+					</tr>
+					<tr>
+						<td>e</td>
+						<td class="expression">2.71828 18284 59045 23536 02874 71352 66249 77572 47093 69995 95749 66967</td>
+					</tr>
+					<tr>
+						<td>pi</td>
+						<td class="expression">3.14159 26535 89793 23846 26433 83279 50288 41971 69399 37510 58209 74944</td>
+					</tr>
+				</table>
+				<h3 id="functions">1.3 Functions</h3>
+				<p>This is a table of available functions. Please note that the function argument must be encapsulated in parenthesizes.</p>
+				<table>
+					<tr>
+						<th>Function</th>
+						<th>Description</th>
+					</tr>
+					<tr>
+						<td class="expression">sin</td>
+						<td>The sine function</td>
+					</tr>
+					<tr>
+						<td class="expression">cos</td>
+						<td>The cosine function</td>
+					</tr>
+					<tr>
+						<td class="expression">tan</td>
+						<td>The tangent function</td>
+					</tr>
+					<tr>
+						<td class="expression">arcsin</td>
+						<td>The inverse sine function</td>
+					</tr>
+					<tr>
+						<td class="expression">arccos</td>
+						<td>The inverse cosine function</td>
+					</tr>
+					<tr>
+						<td class="expression">arctan</td>
+						<td>The inverse tangent function</td>
+					</tr>
+					<tr>
+						<td class="expression">sqrt</td>
+						<td>The square-root function</td>
+					</tr>
+					<tr>
+						<td class="expression">ln</td>
+						<td>The natural logarithm (base <span style="font-family:monospace">e</span>)</td>
+					</tr>
+					<tr>
+						<td class="expression">log</td>
+						<td>The common logarithm (base <span style="font-family:monospace">10</span>)</td>
+					</tr>
+					<tr>
+						<td class="expression">floor</td>
+						<td>Nearest integer, not greater than the argument</td>
+					</tr>
+					<tr>
+						<td class="expression">ceil</td>
+						<td>Nearest integer, not less than the argument</td>
+					</tr>
+				</table>
+				<h2 id="tools">2 Tools</h2>
+				
+				<h3 id="move_tool">2.1 Move tool</h3>
+				<p>To use the move tool, select it in the toolbar at the top of the window. Moving around is as simple as dragging around in the rendering area.</p>
+				
+				<h3 id="zoom_tool">2.2 Zoom tool</h3>
+				<p>The zoom tool has two modes: normal zoom or box zoom. To use normal zoom simply left click anywhere in the rendering area to zoom in and hold <strong>ALT</strong> key while clicking to zoom out.</p>
+				<p>To use box zoom press and hold your left mouse button somewhere in the rendering area, and move the cursor until you see a dashed box, finally release the mouse button.</p>
+				
+				<h3 id="selection_tool">2.3 Selection tool</h3>
+				<p>First select a function from the function list, then press anywhere in the rendering area to select a point on the graph.</p>
+			</div>
+		</div>
+	</body>
+</html>

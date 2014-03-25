@@ -2,30 +2,40 @@
 //  MainWindow.cpp
 //  MathGraph
 //
-//  Copyright Max Ekström. Licenced under GPL v3 (see README).
+//  Copyright Max Ekström. Licensed under GPL v3 (see README).
 //
 //
-
-#include <iostream>
 
 #include "MainWindow.h"
 #include "Expression.h"
 #include "QListWidgetFunctionItem.h"
 
+#include <QMenuBar>
 #include <QCursor>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QSplitter>
 #include <QLabel>
-
+#include <QApplication>
 
 MainWindow::MainWindow()
-    : QWidget()
+    : QWidget(),
+      helpWindow(nullptr)
 {
     setMinimumSize(400, 300);
     
+    QMenuBar *menuBar = new QMenuBar(0);
+    QMenu *helpMenu = menuBar->addMenu("Help");
+    
+    QAction *helpAction = helpMenu->addAction("&Show help");
+    helpAction->setShortcuts(QKeySequence::HelpContents);
+    helpAction->setStatusTip("Display the help window");
+    connect(helpAction, SIGNAL(triggered()), this, SLOT(displayHelpWindow()));
+    
     QVBoxLayout *mainLayout = new QVBoxLayout;
+    
+    mainLayout->QLayout::addWidget(menuBar);
     
     // Toolbar
     QHBoxLayout *toolbar = new QHBoxLayout;
@@ -81,8 +91,8 @@ MainWindow::MainWindow()
     QSplitter *outputArea = new QSplitter();
     
     // Output area: Expression list
-    expressionList = new QListWidget;
-    outputArea->addWidget(expressionList);
+    functionList = new QListWidget;
+    outputArea->addWidget(functionList);
     
     // Output area: Render area
     renderArea = new RenderArea;
@@ -120,8 +130,8 @@ MainWindow::MainWindow()
     connect(selectionToolButton, SIGNAL(clicked()), this, SLOT(setSelectionTool()));
     
     // Expression list
-    connect(expressionList, SIGNAL(itemChanged(QListWidgetItem *)), this, SLOT(expressionChanged(QListWidgetItem *))); // used to check for checked items
-    connect(expressionList, SIGNAL(itemSelectionChanged()), this, SLOT(expressionSelectionChanged()));
+    connect(functionList, SIGNAL(itemChanged(QListWidgetItem *)), this, SLOT(expressionChanged(QListWidgetItem *))); // used to check for checked items
+    connect(functionList, SIGNAL(itemSelectionChanged()), this, SLOT(expressionSelectionChanged()));
 }
 
 QSize MainWindow::sizeHint() const
@@ -139,15 +149,15 @@ void MainWindow::addExpression()
         
         expressionLineEdit->setStyleSheet("");
         
-        Plotter::size_type plotterItemIndex = renderArea->addExpression(expr);
+        Plotter::size_type plotterItemIndex = renderArea->addFunction(expr);
         
         QListWidgetItem *item = new QListWidgetFunctionItem(plotterItemIndex, renderArea->FUNCTION_COLORS[plotterItemIndex % renderArea->FUNCTION_COLORS.size()], expressionString.c_str());
         
-        expressionList->addItem(item);
+        functionList->addItem(item);
         
         expressionLineEdit->setText("");
     }
-    catch(InvalidExpression &e)
+    catch(const InvalidExpression &e)
     {
         expressionLineEdit->setStyleSheet("background: #FF3333;");
     }
@@ -166,6 +176,7 @@ void MainWindow::setMoveTool()
 void MainWindow::setSelectionTool()
 {
     renderArea->setTool(SELECTION);
+    functionList->clear();
 }
 
 void MainWindow::setZoomTool()
@@ -184,18 +195,60 @@ void MainWindow::expressionSelectionChanged()
 {
     renderArea->clearSelection();
     
-    for (int i = 0; i < expressionList->count(); ++i)
+    for (int i = 0; i < functionList->count(); ++i)
     {
-        if (expressionList->item(i)->isSelected()) renderArea->select(i);
+        QListWidgetFunctionItem *functionItem = static_cast<QListWidgetFunctionItem *>(functionList->item(i));
+        
+        if (functionItem->isSelected())
+        {
+            renderArea->select(functionItem->getPlotterIndex());
+        }
+    }
+}
+
+void MainWindow::displayHelpWindow()
+{
+    if (helpWindow == nullptr)
+    {
+        helpWindow = new HelpWindow();
+        helpWindow->show();
+    }
+    else
+    {
+        helpWindow->show();
+        helpWindow->activateWindow();
+        helpWindow->raise();
     }
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
+    if (event->matches(QKeySequence::Delete))
+    {
+        Plotter::size_type removedFunctionIndex = renderArea->removeSelectedFunction();
+        if (removedFunctionIndex != Plotter::npos)
+        {
+            for (int i = removedFunctionIndex+1; i < functionList->count(); ++i)
+            {
+                QListWidgetFunctionItem *functionItem = static_cast<QListWidgetFunctionItem *>(functionList->item(i));
+            
+                functionItem->setPlotterIndex(functionItem->getPlotterIndex() - 1);
+                functionItem->setColor(renderArea->FUNCTION_COLORS[(i - 1) % renderArea->FUNCTION_COLORS.size()]);
+            }
+            
+            delete functionList->takeItem(removedFunctionIndex);
+        }
+    }
+    
     renderArea->keyPressEvent(event);
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
 {
     renderArea->keyReleaseEvent(event);
+}
+
+void MainWindow::closeEvent(QCloseEvent *)
+{
+    QApplication::quit();
 }

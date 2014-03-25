@@ -2,7 +2,7 @@
 //  Point.h
 //  MathGraph
 //
-//  Copyright Max Ekström. Licenced under GPL v3 (see README).
+//  Copyright Max Ekström. Licensed under GPL v3 (see README).
 //
 //
 
@@ -24,9 +24,6 @@ public:
     
     void setX(T _x);
     void setY(T _y);
-    
-    T &refX();
-    T &refY();
 };
 
 template<typename T>
@@ -54,18 +51,6 @@ template<typename T>
 void Point<T>::setY(T _y)
 {
     y = _y;
-}
-
-template<typename T>
-T &Point<T>::refX()
-{
-    return x;
-}
-
-template<typename T>
-T &Point<T>::refY()
-{
-    return y;
 }
 
 #endif /* defined(__MathGraph__Point__) */

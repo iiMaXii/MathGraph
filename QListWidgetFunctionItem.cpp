@@ -2,7 +2,7 @@
 //  QListWidgetFunctionItem.cpp
 //  MathGraph
 //
-//  Copyright Max Ekström. Licenced under GPL v3 (see README).
+//  Copyright Max Ekström. Licensed under GPL v3 (see README).
 //
 //
 
@@ -26,4 +26,15 @@ Plotter::size_type QListWidgetFunctionItem::getPlotterIndex() const
 QColor QListWidgetFunctionItem::getColor() const
 {
     return color;
+}
+
+void QListWidgetFunctionItem::setPlotterIndex(Plotter::size_type _plotterItemIndex)
+{
+    plotterItemIndex = _plotterItemIndex;
+}
+
+void QListWidgetFunctionItem::setColor(const QColor &_color)
+{
+    color = _color;
+    setTextColor(color);
 }

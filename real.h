@@ -2,7 +2,7 @@
 //  real.h
 //  MathGraph
 //
-//  Copyright Max Ekström. Licenced under GPL v3 (see README).
+//  Copyright Max Ekström. Licensed under GPL v3 (see README).
 //
 //
 
@@ -12,12 +12,7 @@
 #include <string>
 #include <cmath>
 
-/**
- * real is assumed to have implemented:
- *  - Unary (-) and binary operators: +, -, *, /
- *  - The functions in the namespace real_functions
- */
-
+// real is assumed to have implemented: unary (-), binary operators: +, -, *, / and the functions defined in the namespace real_functions
 typedef long double real;
 
 namespace real_functions
@@ -36,10 +31,10 @@ namespace real_functions
     const auto ceil  = static_cast<real (*)(real)>( std::ceil );
     const auto floor = static_cast<real (*)(real)>( std::floor );
     
-    const auto log   = static_cast<real (*)(real)>( std::log );
+    const auto ln    = static_cast<real (*)(real)>( std::log );
     const auto log10 = static_cast<real (*)(real)>( std::log10 );
     
-    bool parseReal(const std::string &str, long double &real);
+    bool parseReal(const std::string &str, long double &r);
     real round(real value, int decimals);
     std::string toString(real value);
 }

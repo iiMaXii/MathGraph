@@ -2,15 +2,13 @@
 //  TokenReader.cpp
 //  MathGraph
 //
-//  Copyright Max Ekström. Licenced under GPL v3 (see README).
+//  Copyright Max Ekström. Licensed under GPL v3 (see README).
 //
 //
 
 #include "TokenReader.h"
 
-TokenReader::TokenReader(std::string expression)
-: expressionStream(expression)
-{}
+TokenReader::TokenReader(std::string expression) : expressionStream(expression) {}
 
 TokenType TokenReader::read(std::string &result)
 {
