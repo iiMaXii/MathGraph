@@ -16,6 +16,7 @@ QT += webkitwidgets
 TARGET = MathGraph
 TEMPLATE = app
 
+RESOURCES += doc.qrc
 RESOURCES += images.qrc
 
 SOURCES +=  Expression.cpp \

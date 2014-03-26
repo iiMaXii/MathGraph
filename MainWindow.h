@@ -36,6 +36,7 @@ public slots:
     void expressionChanged(QListWidgetItem *item);
     void expressionSelectionChanged();
     
+    void displayAboutWindow();
     void displayHelpWindow();
     
 protected:

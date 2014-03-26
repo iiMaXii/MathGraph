@@ -20,9 +20,6 @@ class HelpWindow
 public:
     HelpWindow();
     QSize sizeHint() const;
-    
-private:
-    QWebView *webView;
 };
 
 #endif /* defined(__MathGraph__HelpWindow__) */

@@ -15,11 +15,11 @@ HelpWindow::HelpWindow()
     : QWidget()
 {
     setMinimumSize(600, 400);
+    setWindowTitle("MathGraph Help");
     
     QVBoxLayout *mainLayout = new QVBoxLayout;
     
-    webView = new QWebView();
-    
+    QWebView *webView = new QWebView();
     webView->setUrl(QUrl("qrc:/doc/index.html"));
     
     mainLayout->addWidget(webView);

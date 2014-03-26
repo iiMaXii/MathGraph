@@ -9,8 +9,6 @@
 #ifndef __MathGraph__Point__
 #define __MathGraph__Point__
 
-#include "real.h"
-
 template<typename T>
 class Point
 {

@@ -6,6 +6,5 @@
     <file>images/cursor_selector.gif</file>
     <file>images/cursor_zoom_minus.gif</file>
     <file>images/cursor_zoom_plus.gif</file>
-    <file>doc/index.html</file>
 </qresource>
 </RCC>

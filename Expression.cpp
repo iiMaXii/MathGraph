@@ -36,10 +36,6 @@ InvalidExpression::size_type InvalidExpression::getLength() const
 
 EvaluationError::EvaluationError(const std::string &what_arg) : std::runtime_error(what_arg) {}
 
-//////////////////
-// BEGIN STATIC //
-//////////////////
-
 std::map<std::string, const real> Expression::constants = {
     {"pi", 3.141592653589793238462643383279502884197169399375105820974944},
     {"e",  2.718281828459045235360287471352662497757247093699959574966967}
@@ -93,10 +89,6 @@ void Expression::addFunction(std::string name, real (*functionPointer)(real))
 {
     functions[name] = functionPointer;
 }
-
-////////////////
-// END STATIC //
-////////////////
 
 Expression::Expression(std::string expression)
 {

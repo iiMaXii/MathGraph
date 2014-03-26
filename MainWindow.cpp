@@ -24,19 +24,24 @@ MainWindow::MainWindow()
       helpWindow(nullptr)
 {
     setMinimumSize(400, 300);
+    setWindowTitle("MathGraph");
+    
+    QVBoxLayout *mainLayout = new QVBoxLayout;
     
     // Menu
     QMenuBar *menuBar = new QMenuBar(nullptr);
     QMenu *helpMenu = menuBar->addMenu("Help");
+    
+    QAction *aboutAction = helpMenu->addAction("&About");
+    aboutAction->setStatusTip("About MathGraph");
+    connect(aboutAction, SIGNAL(triggered()), this, SLOT(displayAboutWindow()));
     
     QAction *helpAction = helpMenu->addAction("&Show help");
     helpAction->setShortcuts(QKeySequence::HelpContents);
     helpAction->setStatusTip("Display the help window");
     connect(helpAction, SIGNAL(triggered()), this, SLOT(displayHelpWindow()));
     
-    QVBoxLayout *mainLayout = new QVBoxLayout;
-    
-    mainLayout->QLayout::addWidget(menuBar);
+    mainLayout->setMenuBar(menuBar);
     
     // Toolbar
     QHBoxLayout *toolbar = new QHBoxLayout;
@@ -204,6 +209,11 @@ void MainWindow::expressionSelectionChanged()
             renderArea->select(functionItem->getPlotterIndex());
         }
     }
+}
+
+void MainWindow::displayAboutWindow()
+{
+    QMessageBox::about(this, "MathGraph", "MathGraph was created by Max Ekström, and is available under GPL version 3.");
 }
 
 void MainWindow::displayHelpWindow()
