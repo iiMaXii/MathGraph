@@ -28,7 +28,7 @@ RenderArea::RenderArea(QWidget *_parent)
     setAutoFillBackground(true);
     
     invalidSelectionErrorDialog.setIcon(QMessageBox::Warning);
-    invalidSelectionErrorDialog.setText("u haz no functionz se1ect3d1!!!11! n00b");
+    invalidSelectionErrorDialog.setText("No function is selected.");
     
     // Cursors
     zoomPlusCursor = QCursor(QIcon(":images/cursor_zoom_plus.gif").pixmap(16, 16));
