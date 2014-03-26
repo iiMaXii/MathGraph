@@ -23,7 +23,7 @@ public:
         UNDEFINED_NAME,
         INVALID_UNARY_OPERATOR,
         PARENTHESIS_MISSMATCH,
-        INVALID_CHARACTER, // == TokenReader::BAD_TOKEN
+        INVALID_CHARACTER,
         OPERAND_UNDERFLOW,
         OPERAND_OVERFLOW
     };
@@ -40,6 +40,12 @@ private:
     size_type length;
 };
 
+class EvaluationError : public std::runtime_error
+{
+public:
+    EvaluationError(const std::string &what_arg);
+};
+
 class Expression
 {
     static std::map<std::string, const real> constants;
@@ -53,9 +59,10 @@ public:
     static bool setVariable(std::string name, real value);
     static void addFunction(std::string name, real (*)(real));
     
-    Expression();
+    // May throw InvalidExpression
     Expression(std::string expression);
     
+    // May throw EvaluationError. However this indicates an error in the constructor
     real evaluate() const;
 };
 

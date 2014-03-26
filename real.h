@@ -12,7 +12,7 @@
 #include <string>
 #include <cmath>
 
-// real is assumed to have implemented: unary (-), binary operators: +, -, *, / and the functions defined in the namespace real_functions
+// real is assumed to have implemented: unary operator: - and binary operators: +, -, *, / and the functions defined in the namespace real_functions
 typedef long double real;
 
 namespace real_functions

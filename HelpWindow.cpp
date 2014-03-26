@@ -2,7 +2,7 @@
 //  HelpWindow.cpp
 //  MathGraph
 //
-//  Created by Max Ekström on 2014-03-25.
+//  Copyright Max Ekström. Licensed under GPL v3 (see README).
 //
 //
 

@@ -9,7 +9,6 @@
 #include "Expression.h"
 #include "TokenReader.h"
 
-#include <iostream>
 #include <stack>
 #include <queue>
 
@@ -35,7 +34,11 @@ InvalidExpression::size_type InvalidExpression::getLength() const
     return length;
 }
 
-// ---------------- BEGIN STATIC ---------------- //
+EvaluationError::EvaluationError(const std::string &what_arg) : std::runtime_error(what_arg) {}
+
+//////////////////
+// BEGIN STATIC //
+//////////////////
 
 std::map<std::string, const real> Expression::constants = {
     {"pi", 3.141592653589793238462643383279502884197169399375105820974944},
@@ -91,12 +94,11 @@ void Expression::addFunction(std::string name, real (*functionPointer)(real))
     functions[name] = functionPointer;
 }
 
-// ----------------- END STATIC ----------------- //
-
-Expression::Expression() {}
+////////////////
+// END STATIC //
+////////////////
 
 Expression::Expression(std::string expression)
-    : Expression()
 {
     std::stack<std::string> tempStack;
     std::queue<std::string> outputQueue;
@@ -106,8 +108,6 @@ Expression::Expression(std::string expression)
     
     bool isUnary = true;
     int numOperands = 0;
-    //bool expectsParenthesis = false;
-    //bool implicitMultiplication = false;
     
     TokenType tokenType = r.read(token);
     while (tokenType != END)
@@ -115,7 +115,7 @@ Expression::Expression(std::string expression)
         switch (tokenType)
         {
             case NUMBER:
-                outputQueue.push(token); // Add multiplication if next is '(', number, variable
+                outputQueue.push(token);
                 
                 isUnary = false;
                 ++numOperands;
@@ -123,14 +123,14 @@ Expression::Expression(std::string expression)
             case NAME:
                 if (constants.find(token) != constants.end())
                 { // constant
-                    outputQueue.push(real_functions::toString(constants[token])); // Add multiplication if next is '(', number, variable
+                    outputQueue.push(real_functions::toString(constants[token]));
                     
                     isUnary = false;
                     ++numOperands;
                 }
                 else if(variables.find(token) != variables.end())
                 { // variable
-                    outputQueue.push(token); // Add multiplication if next is '(', number, variable
+                    outputQueue.push(token);
                     
                     isUnary = false;
                     ++numOperands;
@@ -138,8 +138,6 @@ Expression::Expression(std::string expression)
                 else if (functions.find(token) != functions.end())
                 { // function
                     tempStack.push(token);
-                    //expectsParenthesis = true;
-                    // Syntax error if parenthesises is NOT found
                 }
                 else
                 {
@@ -185,7 +183,6 @@ Expression::Expression(std::string expression)
             case PARENTHESIS_START:
                 tempStack.push(token);
                 
-                //expectsParenthesis = false;
                 isUnary = true;
                 break;
             case PARENTHESIS_END:
@@ -260,19 +257,16 @@ real Expression::evaluate() const
             {
                 numberStack.push(variables[token]);
             }
+            else if (functions.find(token) != functions.end())
+            {
+                real arg = numberStack.top();
+                numberStack.pop();
+                
+                numberStack.push(functions[token](arg));
+            }
             else
             {
-                if (functions.find(token) != functions.end())
-                {
-                    real arg = numberStack.top();
-                    numberStack.pop();
-                    
-                    numberStack.push(functions[token](arg));
-                }
-                else
-                {
-                    std::cout << "Error! No function " << token << " exists." << std::endl;
-                }
+                throw EvaluationError("Unkown name: " + token);
             }
         }
         else if(TokenReader::isOperator(token))
@@ -291,33 +285,26 @@ real Expression::evaluate() const
                 real firstOperand = numberStack.top();
                 numberStack.pop();
                 
-                if (token.size() != 1)
+                switch (token[0])
                 {
-                    std::cout << "ERROR! Operator size != 1" << std::endl;
-                }
-                else
-                {
-                    switch (token[0])
-                    {
-                        case '+':
-                            numberStack.push(firstOperand + secondOperand);
-                            break;
-                        case '-':
-                            numberStack.push(firstOperand - secondOperand);
-                            break;
-                        case '*':
-                            numberStack.push(firstOperand * secondOperand);
-                            break;
-                        case '/':
-                            numberStack.push(firstOperand / secondOperand);
-                            break;
-                        case '^':
-                            numberStack.push(real_functions::pow(firstOperand, secondOperand));
-                            break;
-                        default:
-                            std::cout << "ERROR! Unkown operator: " << token << std::endl;
-                            break;
-                    }
+                    case '+':
+                        numberStack.push(firstOperand + secondOperand);
+                        break;
+                    case '-':
+                        numberStack.push(firstOperand - secondOperand);
+                        break;
+                    case '*':
+                        numberStack.push(firstOperand * secondOperand);
+                        break;
+                    case '/':
+                        numberStack.push(firstOperand / secondOperand);
+                        break;
+                    case '^':
+                        numberStack.push(real_functions::pow(firstOperand, secondOperand));
+                        break;
+                    default:
+                        throw EvaluationError("Unkown operator: " + token);
+                        break;
                 }
             }
         }
@@ -327,10 +314,9 @@ real Expression::evaluate() const
         }
         else
         {
-            std::cout << "ERROR! Unkown token '" << token << "'" << std::endl;
+            throw EvaluationError("Unkown token " + token);
         }
     }
-    
     
     return numberStack.top();
 }

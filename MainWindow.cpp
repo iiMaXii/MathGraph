@@ -25,7 +25,8 @@ MainWindow::MainWindow()
 {
     setMinimumSize(400, 300);
     
-    QMenuBar *menuBar = new QMenuBar(0);
+    // Menu
+    QMenuBar *menuBar = new QMenuBar(nullptr);
     QMenu *helpMenu = menuBar->addMenu("Help");
     
     QAction *helpAction = helpMenu->addAction("&Show help");
@@ -176,7 +177,6 @@ void MainWindow::setMoveTool()
 void MainWindow::setSelectionTool()
 {
     renderArea->setTool(SELECTION);
-    functionList->clear();
 }
 
 void MainWindow::setZoomTool()
