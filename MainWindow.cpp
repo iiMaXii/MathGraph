@@ -238,7 +238,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         Plotter::size_type removedFunctionIndex = renderArea->removeSelectedFunction();
         if (removedFunctionIndex != Plotter::npos)
         {
-            for (int i = removedFunctionIndex+1; i < functionList->count(); ++i)
+            for (int i = static_cast<int>(removedFunctionIndex+1); i < functionList->count(); ++i)
             {
                 QListWidgetFunctionItem *functionItem = static_cast<QListWidgetFunctionItem *>(functionList->item(i));
             
@@ -246,7 +246,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
                 functionItem->setColor(renderArea->FUNCTION_COLORS[(i - 1) % renderArea->FUNCTION_COLORS.size()]);
             }
             
-            delete functionList->takeItem(removedFunctionIndex);
+            delete functionList->takeItem(static_cast<int>(removedFunctionIndex));
         }
     }
     
