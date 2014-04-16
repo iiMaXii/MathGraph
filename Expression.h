@@ -19,7 +19,8 @@ class InvalidExpression : public std::invalid_argument
 public:
     typedef std::string::size_type size_type;
     
-    enum ErrorType {
+    enum ErrorType
+    {
         UNDEFINED_NAME,
         INVALID_UNARY_OPERATOR,
         PARENTHESIS_MISSMATCH,

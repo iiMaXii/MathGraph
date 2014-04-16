@@ -39,6 +39,8 @@ public:
     
     void centerOrigo();
     void setBounds(real _xMin, real _xMax, real _yMin, real _yMax);
+    std::pair<real, real> getYBounds(size_type expressionIndex) const;
+    void autoYBounds(size_type expressionIndex);
     void setBounds(int xPixelMin, int xPixelMax, int yPixelMin, int yPixelMax);
     void setSamplingRate(real _samplingRate);
     

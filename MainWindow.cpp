@@ -30,16 +30,6 @@ MainWindow::MainWindow()
     
     // Menu
     QMenuBar *menuBar = new QMenuBar(nullptr);
-    QMenu *helpMenu = menuBar->addMenu("Help");
-    
-    QAction *aboutAction = helpMenu->addAction("&About");
-    aboutAction->setStatusTip("About MathGraph");
-    connect(aboutAction, SIGNAL(triggered()), this, SLOT(displayAboutWindow()));
-    
-    QAction *helpAction = helpMenu->addAction("&Show help");
-    helpAction->setShortcuts(QKeySequence::HelpContents);
-    helpAction->setStatusTip("Display the help window");
-    connect(helpAction, SIGNAL(triggered()), this, SLOT(displayHelpWindow()));
     
     mainLayout->setMenuBar(menuBar);
     
@@ -138,6 +128,24 @@ MainWindow::MainWindow()
     // Expression list
     connect(functionList, SIGNAL(itemChanged(QListWidgetItem *)), this, SLOT(expressionChanged(QListWidgetItem *))); // used to check for checked items
     connect(functionList, SIGNAL(itemSelectionChanged()), this, SLOT(expressionSelectionChanged()));
+    
+    // Menu definition
+    QMenu *editMenu = menuBar->addMenu("Edit");
+    
+    QAction *adaptYAction = editMenu->addAction("&Adapt Y-axis");
+    adaptYAction->setStatusTip("Automatically set Y-scale");
+    connect(adaptYAction, SIGNAL(triggered()), renderArea, SLOT(autoYBounds()));
+    
+    QMenu *helpMenu = menuBar->addMenu("Help");
+    
+    QAction *aboutAction = helpMenu->addAction("&About");
+    aboutAction->setStatusTip("About MathGraph");
+    connect(aboutAction, SIGNAL(triggered()), this, SLOT(displayAboutWindow()));
+    
+    QAction *helpAction = helpMenu->addAction("&Show help");
+    helpAction->setShortcuts(QKeySequence::HelpContents);
+    helpAction->setStatusTip("Display the help window");
+    connect(helpAction, SIGNAL(triggered()), this, SLOT(displayHelpWindow()));
 }
 
 QSize MainWindow::sizeHint() const

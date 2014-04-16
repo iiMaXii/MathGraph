@@ -17,7 +17,8 @@ InvalidExpression::InvalidExpression(const std::string &_what_arg, ErrorType _er
       errorType(_errorType),
       position(_position),
       length(_length)
-{}
+{
+}
 
 InvalidExpression::ErrorType InvalidExpression::getError() const
 {

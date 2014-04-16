@@ -10,6 +10,7 @@
 #include "real.h"
 
 #include <QIcon>
+#include <limits>
 
 RenderArea::RenderArea(QWidget *_parent)
     : QWidget(_parent),
@@ -152,6 +153,15 @@ void RenderArea::keyReleaseEvent(QKeyEvent *event)
     {
         setCursor(zoomPlusCursor);
     }
+}
+
+void RenderArea::autoYBounds()
+{
+    plotter.autoYBounds(selectedFunction);
+    
+    selectedCoordinateString.clear();
+    rebuildFunctionCache();
+    update();
 }
 
 void RenderArea::paintEvent(QPaintEvent *)
@@ -414,6 +424,30 @@ void RenderArea::resizeEvent(QResizeEvent *event)
     rebuildFunctionCache();
     
     update();
+}
+
+std::pair<int, int> RenderArea::getYBounds(Plotter::size_type expressionIndex) const
+{
+    QPainterPath currentFunctionCache = functionCache[expressionIndex];
+    int yMin = std::numeric_limits<int>::max();
+    int yMax = std::numeric_limits<int>::min();
+    
+    for (int i = 0; i < currentFunctionCache.elementCount(); ++i)
+    {
+        QPainterPath::Element element = currentFunctionCache.elementAt(i);
+        
+        if (element.y < yMin)
+        {
+            yMin = element.y;
+        }
+        
+        if (element.y > yMax)
+        {
+            yMax = element.y;
+        }
+    }
+    
+    return std::pair<int, int>(yMin, yMax);
 }
 
 void RenderArea::move(const QPoint &newPosition)

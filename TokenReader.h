@@ -11,7 +11,8 @@
 
 #include <sstream>
 
-enum TokenType {
+enum TokenType
+{
     NUMBER,
     OPERATOR,
     NAME,

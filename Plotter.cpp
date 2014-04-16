@@ -8,10 +8,12 @@
 
 #include "Plotter.h"
 #include <cmath>
+#include <limits>
 
 InvalidSelection::InvalidSelection(const std::string &_what_arg)
     : std::logic_error(_what_arg)
-{}
+{
+}
 
 
 Plotter::Plotter(int _pixelWidth, int _pixelHeight, real _xMin, real _xMax, real _yMin, real _yMax, double _samplingRate, int _pixelMarkerGap)
@@ -70,6 +72,80 @@ void Plotter::setBounds(real _xMin, real _xMax, real _yMin, real _yMax)
 void Plotter::setBounds(int xPixelMin, int xPixelMax, int yPixelMin, int yPixelMax)
 {
     setBounds(xPxToPt(xPixelMin), xPxToPt(xPixelMax), yPxToPt(yPixelMax), yPxToPt(yPixelMin));
+}
+
+std::pair<real, real> Plotter::getYBounds(size_type expressionIndex) const
+{
+    real newYMin = std::numeric_limits<real>::max();
+    real newYMax = std::numeric_limits<real>::lowest();
+    
+    const Expression &currentExpression = expressions[expressionIndex];
+    
+    real step = (xMax - xMin) * samplingRate / pixelWidth;
+    real y;
+    for (real x = xMin; x < xMax + step; x += step)
+    {
+        Expression::setVariable("x", x);
+        y = currentExpression.evaluate();
+        
+        if (y < newYMin)
+        {
+            newYMin = y;
+        }
+        
+        if (y > newYMax)
+        {
+            newYMax = y;
+        }
+        
+    }
+    
+    return std::pair<real, real>(newYMin, newYMax);
+}
+
+void Plotter::autoYBounds(size_type expressionIndex)
+{
+    real newYMin = std::numeric_limits<real>::max();
+    real newYMax = std::numeric_limits<real>::lowest();
+    
+    if (expressionIndex == npos)
+    {
+        for (size_type i = 0; i != expressions.size(); ++i)
+        {
+            if (!expressionIsHidden[i])
+            {
+                std::pair<real, real> yBounds  = getYBounds(i);
+                
+                if (newYMin > yBounds.first)
+                {
+                    newYMin = yBounds.first;
+                }
+                
+                if (newYMax < yBounds.second)
+                {
+                    newYMax = yBounds.second;
+                }
+            }
+        }
+    }
+    else
+    {
+        std::pair<real, real> yBounds  = getYBounds(expressionIndex);
+        
+        newYMin = yBounds.first;
+        newYMax = yBounds.second;
+    }
+    
+    if (newYMin < newYMax)
+    {
+        // Add 1% to each side
+        real newYDiff = newYMax - newYMin;
+        newYMin = newYMin - newYDiff * 0.01;
+        newYMax = newYMax + newYDiff * 0.01;
+        
+        yMin = newYMin;
+        yMax = newYMax;
+    }
 }
 
 void Plotter::setSamplingRate(real _samplingRate)

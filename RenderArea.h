@@ -51,6 +51,9 @@ public:
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
     
+public slots:
+    void autoYBounds();
+    
 protected:
     void paintEvent(QPaintEvent *event);
     
@@ -61,6 +64,7 @@ protected:
     void resizeEvent(QResizeEvent *event);
     
 private:
+    std::pair<int, int> getYBounds(Plotter::size_type expressionIndex) const;
     void move(const QPoint &newPosition);
     void doCurveSelection(const QPoint &pos);
     void removeCurveSelection();
@@ -69,7 +73,7 @@ private:
     bool ignoreZoomBox(const QPoint &begin, const QPoint &end);
     
     typedef std::vector<QPainterPath>::size_type size_type;
-    size_type npos = -1;
+    const size_type npos = -1;
     
     QCursor zoomPlusCursor;
     QCursor zoomMinusCursor;

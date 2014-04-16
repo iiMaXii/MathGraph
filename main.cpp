@@ -11,12 +11,6 @@
 
 #include <QApplication>
 
-/**
- * To do:
- *  - Function with no parenthesises around argument gives unexpected results, throw error (!)
- *  - Implicit multiplication not implemented (eg. 5(1+2) or 5a)
- */
-
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
